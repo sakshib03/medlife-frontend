@@ -82,22 +82,26 @@ header {
   flex-direction: column;
 }
 
+.sidebar h3{
+  padding-top: 55px;
+  padding-left: 12px;
+  color: #fe786b;
+}
+
 .sidebar ul {
   list-style: none;
   flex: 1;
-  margin-top: 48px;
 }
 
 .sidebar ul li {
-  padding: 15px 20px;
-  border-bottom: 1px solid #b4b4b4;
+  padding: 10px 20px;
   cursor: pointer;
-  font-size: 16px;
-  color: #828181;
+  font-size: 14px;
+  color: #6e6b6b;
 }
 
 .sidebar ul li:hover {
-  background-color: #e2c8c8;
+  background-color: #f3c8c8;
 }
 
 .upgrade {
@@ -200,7 +204,8 @@ header {
 /* Input area */
 .input-area {
   display: flex;
-  gap: 10px;
+  width: 80%;
+  gap: 4px;
   padding: 10px;
   background-color: #fff;
   border-radius: 8px;
@@ -210,9 +215,10 @@ header {
 .input-area input {
   flex: 1;
   padding: 12px 15px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid #b7b6b6;
+  border-radius: 6px;
   font-size: 16px;
+  background-color: #ebebeb;
 }
 
 .input-area button {
