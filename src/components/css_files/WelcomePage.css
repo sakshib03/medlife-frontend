@@ -1,0 +1,353 @@
+.welcome-container {
+  min-height: 100vh;
+  font-family: "Inder", sans-serif;
+  background-image: linear-gradient(
+    252deg,
+    #ffe5e5 0%,
+    #ebfffd 61.46%,
+    #dffffd 100%
+  );
+}
+
+/* Navbar */
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background-color: white;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.navbar-logo img {
+  width: 50px;
+  height: 50px;
+}
+
+.navbar-logo p {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.navbar-list {
+  display: flex;
+  flex-direction: end;
+  gap: 20px;
+  max-width: 20%;
+}
+
+.navbar-list a {
+  color: #000;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .navbar-list {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 60px;
+    right: 0;
+    background-color: white;
+    width: 100%;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .navbar-list.open {
+    display: flex;
+  }
+}
+
+.sign-in {
+  background-color: #ff5659;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .sign-in {
+    display: none;
+  }
+}
+
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+  }
+}
+
+/* Main Container */
+.main-container {
+  background-size: cover;
+  background-position: center;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 0 80px;
+}
+
+/* You'll need to set the background image in your component */
+.side-content {
+  color: white;
+}
+
+.main-headline {
+  font-size: 2.8rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: rgb(52, 51, 51);
+}
+
+.highlight-red {
+  color: #ff5659;
+}
+
+.main-brief {
+  font-size: 1rem;
+  margin-top: 10px;
+  color: gray;
+}
+
+.choose-plan {
+  background-color: #ff5659;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  margin-top: 20px;
+  cursor: pointer;
+}
+
+/* Features Section */
+.feature-container {
+  padding: 40px 20px;
+  background-color: white;
+}
+
+.feature-container h2 {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+
+.feature-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 40px;
+}
+
+.doctor-image img {
+  max-width: 400px;
+  width: 100%;
+}
+
+.feature-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.feature-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px;
+  border-radius: 12px;
+  background-color: #fceeeb;
+}
+
+.feature-box img {
+  width: 30px;
+  height: 30px;
+}
+
+.feature-box h3 {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.feature-box p {
+  font-size: 0.8rem;
+  margin: 5px 0 0;
+  color: rgb(100, 100, 101);
+}
+
+.feature-box.odd {
+  background-color: #f4f9fa;
+}
+
+@media (max-width: 768px) {
+  .feature-content {
+    flex-direction: column;
+  }
+
+  .feature-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Pricing Section */
+.sales-container {
+  padding: 40px 20px;
+  background-color: white;
+}
+
+.sales-container h1 {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.sales-container p {
+  text-align: center;
+  color: #545353;
+  margin-bottom: 20px;
+}
+
+.pricing-cards {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.pricing-card {
+  flex: 1 1 250px;
+  max-width: 250px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  background-color: white;
+  text-align: center;
+}
+
+.pricing-card h4 {
+  margin: 0;
+  text-align: left;
+}
+
+.pricing-card h2 {
+  margin: 10px 0;
+  text-align: left;
+}
+
+.pricing-card button {
+  background-color: rgb(209, 207, 207);
+  color: #000;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  width: 100%;
+  margin: 10px 0;
+}
+
+.pricing-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+}
+
+.pricing-card ul li {
+  font-size: 12px;
+  margin: 5px 0;
+}
+
+/* Footer */
+.footer-contact {
+  background-color: rgb(61, 69, 81);
+  color: white;
+  padding: 40px 20px;
+}
+
+.footer-wrapper {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.footer-column {
+  flex: 1 1 250px;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer-logo img {
+  width: 40px;
+  height: 40px;
+}
+
+.contact-info {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: row;
+}
+
+.contact-info p {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer-links {
+  display: flex;
+  gap: 40px;
+}
+
+.footer-links ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links ul li {
+  margin: 10px 0;
+}
+
+.social-icons {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+  .footer-wrapper {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .footer-column {
+    border-right: none;
+    border-bottom: 1px solid white;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+  }
+}
