@@ -81,6 +81,11 @@ const ChatInterface = () => {
     navigate('/signin');
   };
 
+  const handleQuestionSelect = (question)=>{
+    setUserInput(question);
+    document.querySelector('.input-area input').focus();
+  };
+
   // Auto-scroll to bottom when messages change
   useEffect(() => {
     if (chatMessagesRef.current) {
@@ -111,18 +116,24 @@ const ChatInterface = () => {
           <div>
             <h3>Recommended Health Questions</h3>
             <ul>
-              <li>Are there any drug interactions I should be aware of?</li>
-              <li>Is there any prescriptions I should be particularly concerned about if added to my list?</li>
-              <li>Are there any medical symptoms I should monitor for when taking my prescriptions?</li>
+              <li onClick={()=> handleQuestionSelect('Are there any drug interactions I should be aware of?')}>
+              Are there any drug interactions I should be aware of?</li>
+              <li onClick={() => handleQuestionSelect('Is there any prescriptions I should be particularly concerned about if added to my list?')}>
+              Is there any prescriptions I should be particularly concerned about if added to my list?</li>
+              <li onClick={() => handleQuestionSelect('Are there any medical symptoms I should monitor for when taking my prescriptions?')}>
+              Are there any medical symptoms I should monitor for when taking my prescriptions?</li>
             </ul>
           </div>
           <div>
             <div>
               <h3>Optional Questions</h3>
               <ul>
-                <li>Could you display the two most influential medical articles for me?</li>
-                <li>Can you provide summaries of both articles, limited to 150 words each?</li>
-                <li>Are there any clinical trials which would interest me?</li>
+                <li onClick={() => handleQuestionSelect('Could you display the two most influential medical articles for me?')}>
+                Could you display the two most influential medical articles for me?</li>
+                <li onClick={() => handleQuestionSelect('Can you provide summaries of both articles, limited to 150 words each?')}>
+                Can you provide summaries of both articles, limited to 150 words each?</li>
+                <li onClick={() => handleQuestionSelect('Are there any clinical trials which would interest me?')}>
+                Are there any clinical trials which would interest me?</li>
               </ul>
             </div>
           </div>
