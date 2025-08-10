@@ -10,6 +10,7 @@ import { Eye, EyeOff } from "lucide-react";
 const SignUp = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail]= useState("");
+  
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -20,36 +21,33 @@ const SignUp = () => {
   };
 
 
-  const dummyCredentials = {
-    username: "testuser",
-    password: "test123",
-    email: "test@example.com"
-  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     try {
-      // Check against dummy credentials
-      if (username === dummyCredentials.username && password === dummyCredentials.password) {
-        localStorage.setItem("userEmail", dummyCredentials.email);
-        localStorage.setItem("showDisclaimer", "true");
-        
-        toast.success('Login successful! ', {
-            position: "top-right",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            draggable: true,
-            progress: undefined,
-            onClose:()=>{
-                window.location.href="/dashboard";
-            }
+      const response = await fetch('http://localhost:8000/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, password })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        toast.success('Signup successful!', {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          draggable: true,
+          progress: undefined,
+          onClose: () => {
+            navigate("/signin");
+          }
         });
       } else {
-        toast.error('Invalid username or password.', {
+        toast.error(data.detail || 'Signup failed.', {
           position: "top-right",
-          autoClose: 5000,
+          autoClose: 2000,
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
@@ -60,7 +58,7 @@ const SignUp = () => {
     } catch (error) {
       toast.error('An error occurred. Please try again later.', {
         position: "top-right",
-        autoClose: 5000,
+        autoClose: 2000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
@@ -75,7 +73,7 @@ const SignUp = () => {
 
     <ToastContainer
         position="top-right"
-        autoClose={5000}
+        autoClose={2000}
         hideProgressBar={false}
         newestOnTop={false}
         closeOnClick
@@ -125,9 +123,11 @@ const SignUp = () => {
               type="text"
               id="email-address"
               value={email}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
+
+          
 
             <div style={{ position: "relative" }}>
               <label
@@ -181,14 +181,6 @@ const SignUp = () => {
               }}>
                 Sign In
               </a>
-            </p>
-
-            <button type="button" className="google-btn">
-              Continue with Google
-            </button>
-
-            <p>
-              By continuing, you agree to the Terms of use and Privacy Policy
             </p>
           </form>
         </div>

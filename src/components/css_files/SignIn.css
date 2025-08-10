@@ -52,7 +52,7 @@ header {
     max-width: 800px;
     width: 100%;
     flex-direction: row;
-    height: 85vh;
+    height: 520px;
     background-color: white;
    margin-top: 4rem;
 }
@@ -117,18 +117,6 @@ header {
     background: #f4766f;
 }
 
-.form-container .google-btn {
-    background: white;
-    border: 1px solid gray;
-    color: #3b3b3b;
-    border-radius: 15px;
-    padding: 0.6rem;
-    width: 100%;
-    cursor: pointer;
-    font-size: 0.8rem;
-    margin: 0.8rem 0;
-    transition: background-color 0.3s ease;
-}
 
 .error-message {
     color: red;

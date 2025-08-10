@@ -6,51 +6,49 @@ import sidelogo from "../assets/signup.png";
 import medlife from "../assets/v987-18a-removebg-preview.png";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 const SignIn = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
-  const dummyCredentials = {
-    username: "testuser",
-    password: "test123",
-    email: "test@example.com",
-  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     try {
-      // Check against dummy credentials
-      if (
-        username === dummyCredentials.username &&
-        password === dummyCredentials.password
-      ) {
-        localStorage.setItem("userEmail", dummyCredentials.email);
-        localStorage.setItem("showDisclaimer", "true");
+      const response = await fetch('http://localhost:8000/signin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ login: username, password })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        // Store logged-in user's email in localStorage
+        login(data.email);
 
-        toast.success("Login successful! ", {
+
+        toast.success('Login successful!', {
           position: "top-right",
-          autoClose: 3000,
+          autoClose: 2000,
           hideProgressBar: false,
           closeOnClick: true,
           draggable: true,
           progress: undefined,
-          onClose: () => {
-            window.location.href = "/disclaimer";
-          },
+onClose: () => navigate("/disclaimer") // Redirect to disclaimer page after login
+          
         });
       } else {
-        toast.error("Invalid username or password.", {
+        toast.error(data.detail || "Invalid email or password.", {
           position: "top-right",
-          autoClose: 3000,
+          autoClose: 2000,
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
@@ -61,7 +59,7 @@ const SignIn = () => {
     } catch (error) {
       toast.error("An error occurred. Please try again later.", {
         position: "top-right",
-        autoClose: 5000,
+        autoClose: 2000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
@@ -147,38 +145,24 @@ const SignIn = () => {
               </button>
             </div>
 
-            <a style={{ color: "blue" }} className="forgot">
-              Forgot password
-            </a>
+<button type="button" style={{ color: "blue", background: "none", border: "none", padding: 0, textDecoration: "underline", cursor: "pointer" }} className="forgot">Forgot password</button>
             <button type="submit" className="sign-in-btn">
               Sign In
             </button>
 
-            {errorMessage && (
-              <p className="error-message" style={{ display: "block" }}>
-                {errorMessage}
-              </p>
-            )}
 
             <p style={{ color: "gray" }}>
               Don't have an account?{" "}
-              <a
-                style={{ color: "blue" }}
+<button
+                type="button"
+                style={{ color: "blue", background: "none", border: "none", padding: 0, textDecoration: "underline", cursor: "pointer" }}
                 className="sign-up"
                 onClick={() => {
                   navigate("/signup");
                 }}
               >
                 Sign Up
-              </a>
-            </p>
-
-            <button type="button" className="google-btn">
-              Continue with Google
-            </button>
-
-            <p>
-              By continuing, you agree to the Terms of use and Privacy Policy
+              </button>
             </p>
           </form>
         </div>
@@ -189,6 +173,6 @@ const SignIn = () => {
       </div>
     </div>
   );
-};
+  };
 
 export default SignIn;

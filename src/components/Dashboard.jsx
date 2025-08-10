@@ -1,78 +1,122 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./css_files/Dashboard.css";
 import medlife from "../assets/v987-18a-removebg-preview.png";
 import { useNavigate } from "react-router-dom";
-import { Edit, Download } from "lucide-react";
+import { Edit, Download, Delete } from "lucide-react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
-  const [data, setData] = useState([
-    { name: "Jon roy", value: 100 },
-    { name: "John Smith", value: 120 },
-  ]);
 
-  const [formData, setFormData] = useState({
-    firstName: "John",
-    lastName: "Smith",
-    dob: "01/01/1950",
-    race: "Asian Indian",
-    gender: "Male",
-    height: "5.10ft",
-    weight: "200lbs",
-    a1c: "10.5",
-    bloodPressure: "150/90",
-    bmi: "29",
-    prescription:
-      "Metformin, Januvia, Acebutolol, Betaxolol, Aspirin, Etizolam, Elavil",
-  });
+  // 🔁 START WITH EMPTY MEMBER LIST
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleChange = (e) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
-  };
+  // Fetch members on component mount
+  useEffect(() => {
+    fetchMembers();
+  }, []);
 
-  const addMember = () => {
-    if (data.length >= 4) {
-      alert("You've reached the maximum number of members (4)");
+  const fetchMembers = async () => {
+    const email = localStorage.getItem("userEmail");
+    if (!email) {
+      navigate("/signin");
       return;
     }
 
-    // Add the new member to the table
-    setData((prevData) => [
-      ...prevData,
-      {
-        name: `${formData.firstName} ${formData.lastName}`,
-        value: 0,
-      },
-    ]);
+    try {
+      const response = await fetch(
+        `http://localhost:8000/medlife/getmember?email=${encodeURIComponent(
+          email
+        )}`
+      );
+      const result = await response.json();
 
-    alert("Member added successfully!");
-    setIsAddMemberModalOpen(false);
+      if (response.ok) {
+        const members = result.members
+          .map((member, index) => ({
+            name: `${member.firstName} ${member.lastName}`,
+            value: member.tokens || 0,
+            memberIndex: index + 1, // Add member slot index 1-4
+            ...member,
+          }))
+          .filter((member) => member.firstName); // Filter out empty members
+        setData(members);
+      } else {
+        console.error("Failed to fetch members:", result.detail);
+        setData([]);
+      }
+    } catch (error) {
+      console.error("Error fetching members:", error);
+      setData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    // Reset form data
-    setFormData({
-      firstName: "John",
-      lastName: "Smith",
-      dob: "01/01/1950",
-      race: "Asian Indian",
-      gender: "Male",
-      height: "5.10ft",
-      weight: "200lbs",
-      a1c: "10.5",
-      bloodPressure: "150/90",
-      bmi: "29",
-      prescription:
-        "Metformin, Januvia, Acebutolol, Betaxolol, Aspirin, Etizolam, Elavil",
-    });
+  const handleAddMember = () => {
+    navigate("/medlife/addmember");
+  };
+
+  const handleStartChat = async (member) => {
+    const email = localStorage.getItem("userEmail");
+    if (!email) {
+      alert("User not logged in");
+      return;
+    }
+
+    try {
+      console.log("Fetching member details for:", member);
+      const response = await fetch(
+        `http://localhost:8000/api/member-details/${encodeURIComponent(
+          email
+        )}/${member.memberIndex}`
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch member details");
+      }
+
+      const data = await response.json();
+      console.log("Fetched member details:", data);
+
+      // Store member details in localStorage for chat context
+      localStorage.setItem("currentMember", JSON.stringify(data.member));
+      console.log(
+        "Stored currentMember in localStorage:",
+        localStorage.getItem("currentMember")
+      );
+
+      // Navigate to chat with member context
+      navigate("/medlife/prompt", {
+        state: {
+          member: data.member,
+          memberName: member.name,
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching member details:", error);
+      alert("Failed to load member details. Please try again.");
+    }
+  };
+
+  const handleEditMember = async (member) => {
+    const email = localStorage.getItem("userEmail");
+    if (!email) {
+      alert("User not logged in");
+      return;
+    }
+
+    // Implement edit member functionality
+    // This would typically open a modal or redirect to an edit form
+    // For now, we'll log the member details and provide a basic edit interface
+    console.log("Editing member:", member);
+
+    // Example implementation - redirect to edit page with member details
+    navigate("/medlife/editmember", { state: { member: member } });
   };
 
   return (
     <div className="dashboard">
-      {/* Header section remains the same */}
       <header>
         <div className="header-left">
           <img src={medlife} alt="MedLife AI Logo" className="logo" />
@@ -81,18 +125,12 @@ const Dashboard = () => {
           </div>
         </div>
         <div>
-          <button
-            className="logout"
-            onClick={() => {
-              navigate("/");
-            }}
-          >
+          <button className="logout" onClick={() => navigate("/")}>
             Logout
           </button>
         </div>
       </header>
 
-      {/* Dashboard content */}
       <div className="dashboard-container">
         <div className="main-sidecontainer">
           <div className="table-container">
@@ -101,53 +139,159 @@ const Dashboard = () => {
               <thead>
                 <tr>
                   <th>Name</th>
-                  <th>Tokens</th>
                   <th>Start Chat</th>
                   <th>Edit</th>
                   <th>PDF</th>
+                  <th>Delete</th>
                 </tr>
               </thead>
               <tbody>
-                {data.map((item, index) => (
-                  <tr key={index}>
-                    <td>{item.name}</td>
-                    <td>{item.value}</td>
-                    <td>
-                      <button
-                        className="start-btn"
-                        onClick={() => {
-                          navigate("/chat");
-                        }}
-                      >
-                        Start
-                      </button>
-                    </td>
-                    <td>
-                      <span className="edit-icon">
-                        <Edit size={18} />
-                      </span>
-                    </td>
-                    <td>
-                      <span className="pdf-icon">
-                        <Download size={20} />
-                      </span>
+                {data.filter((item) => item.firstName).length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan="5"
+                      style={{
+                        textAlign: "center",
+                        padding: "1rem",
+                        color: "#999",
+                      }}
+                    >
+                      No members yet. Click "Add New Member" to begin.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  data
+                    .filter((item) => item.firstName)
+                    .map((item, index) => (
+                      <tr key={index}>
+                        <td>{item.name}</td>
+                        <td>
+                          <button
+                            className="start-btn"
+                            onClick={() => handleStartChat(item)}
+                          >
+                            Start
+                          </button>
+                        </td>
+                        <td>
+                          <span
+                            className="edit-icon"
+                            onClick={() => handleEditMember(item)}
+                            style={{ cursor: "pointer" }}
+                          >
+                            <Edit size={18} />
+                          </span>
+                        </td>
+                        <td>
+                          <span
+                            className="pdf-icon"
+                            onClick={async () => {
+                              const email = localStorage.getItem("userEmail");
+                              if (!email) {
+                                alert("User not logged in");
+                                return;
+                              }
+
+                              try {
+                                // Fetch chat data from backend
+                                const response = await fetch(
+                                  `http://localhost:8000/medlife/fetchChat/?email=${encodeURIComponent(
+                                    email
+                                  )}&member_name=${encodeURIComponent(
+                                    item.firstName + "_" + item.lastName
+                                  )}`
+                                );
+                                if (!response.ok) {
+                                  throw new Error("Failed to fetch chat data");
+                                }
+                                const data = await response.json();
+                                const messages = data.chat || [];
+
+                                // Import and use getPdf
+                                const { default: generatePDF } = await import(
+                                  "./getPdf.jsx"
+                                );
+
+                                // Format messages for PDF
+                                const formattedMessages = messages.map(
+                                  (msg) => ({
+                                    type: msg.sender,
+                                    name: msg.name,
+                                    message: msg.text.replace(/<br>/g, "\n"),
+                                  })
+                                );
+
+                                // Generate PDF
+                                generatePDF(formattedMessages, item.name);
+                              } catch (error) {
+                                console.error("Error generating PDF:", error);
+                                alert(
+                                  "Error generating PDF. Please try again."
+                                );
+                              }
+                            }}
+                            style={{ cursor: "pointer" }}
+                          >
+                            <Download size={20} />
+                          </span>
+                        </td>
+                        <td>
+                          <button
+                            className="start-btn"
+                            style={{ backgroundColor: "red" }}
+                            onClick={async () => {
+                              const email = localStorage.getItem("userEmail");
+                              if (!email) {
+                                alert("User not logged in");
+                                return;
+                              }
+
+                              // Confirm deletion
+                              const confirmDelete = window.confirm(
+                                `Are you sure you want to delete ${item.name}? This action cannot be undone.`
+                              );
+                              if (!confirmDelete) return;
+
+                              try {
+                                const response = await fetch(
+                                  `http://localhost:8000/medlife/deletemember?email=${encodeURIComponent(
+                                    email
+                                  )}&member_index=${item.memberIndex}`,
+                                  {
+                                    method: "DELETE",
+                                    headers: {
+                                      "Content-Type": "application/json",
+                                    },
+                                  }
+                                );
+                                const data = await response.json();
+                                if (!response.ok) {
+                                  alert(
+                                    typeof data === "object"
+                                      ? JSON.stringify(data)
+                                      : data || "Failed to delete member"
+                                  );
+                                  return;
+                                }
+                                alert("Member deleted successfully");
+                                // Refresh the member list
+                                fetchMembers();
+                              } catch (error) {
+                                alert("Server error: " + error.message);
+                              }
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                )}
               </tbody>
             </table>
           </div>
 
-          <button
-            className="add-member-btn"
-            onClick={() => {
-              if (data.length >= 4) {
-                alert("You've reached the maximum number of members (4)");
-              } else {
-                setIsAddMemberModalOpen(true);
-              }
-            }}
-          >
+          <button className="add-member-btn" onClick={handleAddMember}>
             + Add New Member
           </button>
 
@@ -164,150 +308,6 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-
-      {/* Add Member Modal */}
-      {isAddMemberModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <button
-              className="modal-close-btn"
-              onClick={() => setIsAddMemberModalOpen(false)}
-            >
-              ✖
-            </button>
-
-            <div className="new-member-container">
-              <main className="new-member-main">
-                Begin by editing the sample patient information below and then
-                press CONFIRM at the bottom of the screen
-              </main>
-
-              <div className="new-member-form-container">
-                <div className="new-member-form-section">
-                  <h3 className="new-member-h3">Personal Information</h3>
-                  <label className="new-member-label">First Name *</label>
-                  <input
-                    type="text"
-                    id="firstName"
-                    className="new-member-input"
-                    value={formData.firstName}
-                    onChange={handleChange}
-                  />
-
-                  <label className="new-member-label">Last Name *</label>
-                  <input
-                    type="text"
-                    id="lastName"
-                    className="new-member-input"
-                    value={formData.lastName}
-                    onChange={handleChange}
-                  />
-
-                  <label className="new-member-label">DOB *</label>
-                  <input
-                    type="date"
-                    id="dob"
-                    className="new-member-input"
-                    value={formData.dob}
-                    onChange={handleChange}
-                  />
-
-                  <label className="new-member-label">Race</label>
-                  <input
-                    type="text"
-                    id="race"
-                    className="new-member-input"
-                    value={formData.race}
-                    onChange={handleChange}
-                  />
-
-                  <label className="new-member-label">Gender</label>
-                  <input
-                    type="text"
-                    id="gender"
-                    className="new-member-input"
-                    value={formData.gender}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="new-member-form-section">
-                  <h3 className="new-member-h3">Medical Information</h3>
-                  <label className="new-member-label">Height *</label>
-                  <input
-                    type="text"
-                    id="height"
-                    className="new-member-input"
-                    value={formData.height}
-                    onChange={handleChange}
-                  />
-
-                  <label className="new-member-label">Weight *</label>
-                  <input
-                    type="text"
-                    id="weight"
-                    className="new-member-input"
-                    value={formData.weight}
-                    onChange={handleChange}
-                  />
-
-                  <label className="new-member-label">A1C</label>
-                  <input
-                    type="text"
-                    id="a1c"
-                    className="new-member-input"
-                    value={formData.a1c}
-                    onChange={handleChange}
-                  />
-
-                  <label className="new-member-label">Blood Pressure</label>
-                  <input
-                    type="text"
-                    id="bloodPressure"
-                    className="new-member-input"
-                    value={formData.bloodPressure}
-                    onChange={handleChange}
-                  />
-
-                  <label className="new-member-label">BMI</label>
-                  <input
-                    type="text"
-                    id="bmi"
-                    className="new-member-input"
-                    value={formData.bmi}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-
-              <div className="new-member-prescription-container">
-                <label className="new-member-label">Prescription *</label>
-                <textarea
-                  id="prescription"
-                  className="new-member-textarea"
-                  value={formData.prescription}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div className="new-member-button-container">
-                <button
-                  className="new-member-button new-member-add-btn"
-                  onClick={addMember}
-                >
-                  Add Member
-                </button>
-                <button
-                  className="new-member-button new-member-cancel-btn"
-                  onClick={() => setIsAddMemberModalOpen(false)}
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
