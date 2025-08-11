@@ -709,11 +709,7 @@ const ChatInterface = () => {
               ✖
             </button>
 
-            <h2>Enter Your AI API Keys</h2>
-            <p style={{ marginBottom: 12, fontSize: 14, color: "#666" }}>
-              Add keys for any providers you want to use. The provider dropdown
-              will show only those with a saved key.
-            </p>
+            <h2 style={{marginBottom: "10px", color:"#fe8f85", fontSize:"20px"}}>Enter Your AI API Keys</h2>
 
             <div className="api-providers-list">
               {PROVIDERS.map((provider) => (
