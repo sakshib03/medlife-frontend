@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "./css_files/Dashboard.css";
 import medlife from "../assets/v987-18a-removebg-preview.png";
 import { useNavigate } from "react-router-dom";
@@ -87,7 +89,7 @@ const Dashboard = () => {
   const handleStartChat = async (member) => {
     const email = localStorage.getItem("userEmail");
     if (!email) {
-      alert("User not logged in");
+      toast.error("User not logged in", { autoClose: 2000 });
       return;
     }
 
@@ -106,7 +108,9 @@ const Dashboard = () => {
         state: { member: data.member, memberName: member.name },
       });
     } catch (error) {
-      alert("Failed to load member details. Please try again.");
+      toast.error("Failed to load member details. Please try again.", {
+        autoClose: 2000,
+      });
     }
   };
 
@@ -117,6 +121,17 @@ const Dashboard = () => {
   return (
     <div className="dashboard">
       {/* Polished header with user badge styles from Dashboard.css */}
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
       <header className="dash-header">
         <div className="header-left">
           <img src={medlife} alt="MedLife AI Logo" className="logo" />
@@ -124,7 +139,10 @@ const Dashboard = () => {
         </div>
 
         <div className="header-right">
-          <UserBadge name={userName || "User"} email={userEmail || "No email"} />
+          <UserBadge
+            name={userName || "User"}
+            email={userEmail || "No email"}
+          />
           <button className="logout" onClick={() => navigate("/")}>
             Logout
           </button>
@@ -188,7 +206,9 @@ const Dashboard = () => {
                             onClick={async () => {
                               const email = localStorage.getItem("userEmail");
                               if (!email) {
-                                alert("User not logged in");
+                                toast.error("User not logged in", {
+                                  autoClose: 2000,
+                                });
                                 return;
                               }
 
@@ -208,7 +228,17 @@ const Dashboard = () => {
                                 const messages = data.chat || [];
 
                                 if (messages.length === 0) {
-                                  alert("Start chat first before downloading PDF");
+                                  toast.info(
+                                    "Start chat first before downloading PDF",
+                                    {
+                                      position: "top-right",
+                                      autoClose: 2000,
+                                      hideProgressBar: false,
+                                      closeOnClick: true,
+                                      draggable: true,
+                                      progress: undefined,
+                                    }
+                                  );
                                   return;
                                 }
 
@@ -228,10 +258,26 @@ const Dashboard = () => {
 
                                 // Generate PDF
                                 generatePDF(formattedMessages, item.name);
+                                toast.success("PDF generated successfully!", {
+                                  position: "top-right",
+                                  autoClose: 2000,
+                                  hideProgressBar: false,
+                                  closeOnClick: true,
+                                  draggable: true,
+                                  progress: undefined,
+                                });
                               } catch (error) {
                                 console.error("Error generating PDF:", error);
-                                alert(
-                                  "Error generating PDF. Please try again."
+                                toast.error(
+                                  "Error generating PDF. Please try again.",
+                                  {
+                                    position: "top-right",
+                                    autoClose: 2000,
+                                    hideProgressBar: false,
+                                    closeOnClick: true,
+                                    draggable: true,
+                                    progress: undefined,
+                                  }
                                 );
                               }
                             }}
@@ -245,10 +291,11 @@ const Dashboard = () => {
                             className="start-btn"
                             style={{ backgroundColor: "red" }}
                             onClick={async () => {
-                              const email =
-                                localStorage.getItem("userEmail");
+                              const email = localStorage.getItem("userEmail");
                               if (!email) {
-                                alert("User not logged in");
+                                toast.error("User not logged in", {
+                                  autoClose: 2000,
+                                });
                                 return;
                               }
 
@@ -272,18 +319,23 @@ const Dashboard = () => {
                                 );
                                 const data = await response.json();
                                 if (!response.ok) {
-                                  alert(
+                                  toast.error(
                                     typeof data === "object"
                                       ? JSON.stringify(data)
-                                      : data || "Failed to delete member"
+                                      : data || "Failed to delete member",
+                                    { autoClose: 2000 }
                                   );
                                   return;
                                 }
-                                alert("Member deleted successfully");
+                                toast.success("Member deleted successfully", {
+                                  autoClose: 2000,
+                                });
                                 // Refresh the member list
                                 fetchMembers();
                               } catch (error) {
-                                alert("Server error: " + error.message);
+                                toast.error("Server error: " + error.message, {
+                                  autoClose: 2000,
+                                });
                               }
                             }}
                           >
@@ -306,9 +358,9 @@ const Dashboard = () => {
           <div className="note-section">
             <h3>Note:</h3>
             <p>
-              To save the chat to the cloud, click on the Cloud icon in the
-              chat box next to the send button. For reference, download a PDF of
-              your chat history by clicking the Download icon next to the Cloud
+              To save the chat to the cloud, click on the Cloud icon in the chat
+              box next to the send button. For reference, download a PDF of your
+              chat history by clicking the Download icon next to the Cloud
               Button in the chat box.
             </p>
           </div>
@@ -324,8 +376,8 @@ const UserBadge = ({ name, email }) => {
     <div className="user-badge" title={`${name} (${email})`}>
       <User size={18} className="user-icon" />
       <div className="user-text">
-            <span className="user-name" >{name}</span>
-            <span className="user-email" >({email})</span>
+        <span className="user-name">{name}</span>
+        <span className="user-email">({email})</span>
       </div>
     </div>
   );

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "./css_files/AddMember.css";
 import medlife from "../assets/v987-18a-removebg-preview.png";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -19,7 +21,8 @@ const EditMember = () => {
     a1c: "10.5",
     bloodPressure: "150/90",
     bmi: "29",
-    prescription: "Metformin, Januvia, Acebutolol, Betaxolol, Aspirin, Etizolam, Elavil",
+    prescription:
+      "Metformin, Januvia, Acebutolol, Betaxolol, Aspirin, Etizolam, Elavil",
   });
 
   useEffect(() => {
@@ -35,7 +38,9 @@ const EditMember = () => {
         a1c: member.a1c || "10.5",
         bloodPressure: member.bloodPressure || "150/90",
         bmi: member.bmi || "29",
-        prescription: member.medicine || "Metformin, Januvia, Acebutolol, Betaxolol, Aspirin, Etizolam, Elavil",
+        prescription:
+          member.medicine ||
+          "Metformin, Januvia, Acebutolol, Betaxolol, Aspirin, Etizolam, Elavil",
       });
     }
   }, [member]);
@@ -83,14 +88,41 @@ const EditMember = () => {
 
       if (!response.ok) {
         console.error("❌ Server Response:", data);
-        alert(data.detail || JSON.stringify(data) || "Failed to edit member");
+        toast.error(
+          data.detail || JSON.stringify(data) || "Failed to edit member",
+          {
+            position: "top-right",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            draggable: true,
+            progress: undefined,
+          }
+        );
         return;
       }
 
-      alert("✅ Member updated successfully!");
+      if (response.ok) {
+        toast.success("Member updated successfully!", {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          draggable: true,
+          progress: undefined,
+        });
+      }
+
       navigate("/dashboard");
     } catch (error) {
-      alert("Server error: " + error.message);
+      toast.error("Server error: " + error.message, {
+    position: "top-right",
+    autoClose: 2000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    draggable: true,
+    progress: undefined,
+  });
     }
   };
 
@@ -115,7 +147,8 @@ const EditMember = () => {
       </header>
 
       <main className="new-member-main">
-        Update the member information below and then press UPDATE at the bottom of the screen
+        Update the member information below and then press UPDATE at the bottom
+        of the screen
       </main>
 
       <div className="new-member-form-container">

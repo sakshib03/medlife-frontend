@@ -13,8 +13,10 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  width: 100vw;
   overflow: hidden;
+  width: 100vw;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 /* Header styles */
@@ -321,12 +323,12 @@ header {
 }
 
 .api-option:hover {
-  border-color: #3498db;
+  border-color: #fe8f85;
   background-color: #f8f9fa;
 }
 
 .api-option.selected {
-  border-color: #3498db;
+  border-color: #fe8f85;
   background-color: #e8f4fc;
 }
 
@@ -386,13 +388,13 @@ header {
 }
 
 .submit-btn {
-  background-color: #fe786b;;
+  background-color: #fe786b;
   color: white;
   border: none;
 }
 
 .submit-btn:hover:not(:disabled) {
-  background-color: #2980b9;
+  background-color: #fe8f85;
 }
 
 .submit-btn:disabled {
@@ -423,9 +425,9 @@ header {
 }
 
 .api-provider.selected {
-  border-color: #3498db;
+  border-color: #fe8f85;
   background-color: #e8f4fc;
-  box-shadow: 0 0 0 1px #3498db;
+  box-shadow: 0 0 0 1px #fe8f85;
 }
 
 .provider-info {

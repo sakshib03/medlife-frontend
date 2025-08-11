@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { toast } from "react-toastify";
 import "./css_files/Dashboard.css";
 
 const DeleteMember = () => {
@@ -37,7 +38,14 @@ const DeleteMember = () => {
         throw new Error(data.detail || "Failed to delete member");
       }
 
-      alert("Member deleted successfully!");
+      toast.success("Member deleted successfully!", {
+  position: "top-right",
+  autoClose: 2000,
+  hideProgressBar: false,
+  closeOnClick: true,
+  draggable: true,
+  progress: undefined,
+});
       navigate("/medlife/dashboard");
       
     } catch (err) {
@@ -82,7 +90,7 @@ const DeleteMember = () => {
             )}
 
             <div style={{ 
-              backgroundColor: "#f9f9f9", 
+              backgroundColor: "#f9faa", 
               padding: "2rem", 
               borderRadius: "8px", 
               marginBottom: "2rem",

@@ -35,7 +35,7 @@ const SignIn = () => {
 
         toast.success('Login successful!', {
           position: "top-right",
-          autoClose: 3000,
+          autoClose: 2000,
           hideProgressBar: false,
           closeOnClick: true,
           draggable: true,
@@ -47,7 +47,7 @@ onClose: () => {
       } else {
         toast.error(data.detail || "Invalid email or password.", {
           position: "top-right",
-          autoClose: 3000,
+          autoClose: 2000,
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
@@ -58,7 +58,7 @@ onClose: () => {
     } catch (error) {
       toast.error("An error occurred. Please try again later.", {
         position: "top-right",
-        autoClose: 5000,
+        autoClose: 2000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
@@ -72,7 +72,7 @@ onClose: () => {
     <div className="background-content">
       <ToastContainer
         position="top-right"
-        autoClose={5000}
+        autoClose={2000}
         hideProgressBar={false}
         newestOnTop={false}
         closeOnClick

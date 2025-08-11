@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./css_files/AddMember.css";
+import { toast } from "react-toastify";
 import medlife from "../assets/v987-18a-removebg-preview.png";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -69,14 +70,14 @@ const AddMember = () => {
 
       if (!response.ok) {
         console.error("❌ Server Response:", data);
-        alert(data.detail || "Failed to add member");
+        toast.error(data.detail || "Failed to edit member");
         return;
       }
 
-      alert("✅ Member added successfully!");
+       toast.success("Member updated successfully!");
       navigate("/dashboard"); // ✅ Redirect after success
     } catch (error) {
-      alert("Server error: " + error.message);
+      toast.error("Server error: " + error.message);
     }
   };
 
@@ -117,14 +118,14 @@ const AddMember = () => {
 
       if (!response.ok) {
         console.error("❌ Server Response:", data);
-        alert(data.detail || "Failed to edit member");
+        toast.error(data.detail || "Failed to add member");
         return;
       }
 
-      alert("✅ Member updated successfully!");
+      toast.success("✅ Member added successfully!");
       navigate("/dashboard");
     } catch (error) {
-      alert("Server error: " + error.message);
+      toast.error("Server error: " + error.message);
     }
   };
 

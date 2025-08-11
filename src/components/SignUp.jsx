@@ -58,58 +58,50 @@ const SignUp = () => {
 
 
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+ const handleSubmit = async (event) => {
+  event.preventDefault();
 
-    try {
-      const response = await fetch('http://localhost:8000/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, email, password })
-      });
-      const data = await response.json();
-      if (response.ok) {
-        toast.success('Signup successful!', {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          draggable: true,
-          progress: undefined,
-          onClose: () => {
-            navigate("/signin");
-          }
-        });
-      } else {
-        toast.error(data.detail || 'Signup failed.', {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-      }
-    } catch (error) {
-      toast.error('An error occurred. Please try again later.', {
+  // Final validations before API call
+  if (!validateEmail(email)) {
+    setEmailError("Invalid email format");
+    return; // Stop submission
+  }
+
+  const passwordValidationError = validatePassword(password);
+  if (passwordValidationError) {
+    setPasswordError(passwordValidationError);
+    return; // Stop submission
+  }
+
+  try {
+    const response = await fetch('http://localhost:8000/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, email, password })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      toast.success('Signup successful!', {
         position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
+        autoClose: 2000,
+        onClose: () => navigate("/signin")
       });
+    } else {
+      toast.error(data.detail || 'Signup failed.', { autoClose: 2000 });
     }
-  };
+  } catch (error) {
+    toast.error('An error occurred. Please try again later.', { autoClose: 2000 });
+  }
+};
 
   return (
     <div className="background-content">
 
     <ToastContainer
         position="top-right"
-        autoClose={5000}
+        autoClose={2000}
         hideProgressBar={false}
         newestOnTop={false}
         closeOnClick
