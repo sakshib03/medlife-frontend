@@ -74,7 +74,7 @@ const AddMember = () => {
         return;
       }
 
-       toast.success("Member updated successfully!");
+       toast.success("Member Added successfully!");
       navigate("/dashboard"); // ✅ Redirect after success
     } catch (error) {
       toast.error("Server error: " + error.message);
