@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import "./css_files/AddMember.css";
 import medlife from "../assets/v987-18a-removebg-preview.png";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 const EditMember = () => {
   const location = useLocation();
@@ -21,8 +19,7 @@ const EditMember = () => {
     a1c: "10.5",
     bloodPressure: "150/90",
     bmi: "29",
-    prescription:
-      "Metformin, Januvia, Acebutolol, Betaxolol, Aspirin, Etizolam, Elavil",
+    prescription: "Metformin, Januvia, Acebutolol, Betaxolol, Aspirin, Etizolam, Elavil",
   });
 
   useEffect(() => {
@@ -38,9 +35,7 @@ const EditMember = () => {
         a1c: member.a1c || "10.5",
         bloodPressure: member.bloodPressure || "150/90",
         bmi: member.bmi || "29",
-        prescription:
-          member.medicine ||
-          "Metformin, Januvia, Acebutolol, Betaxolol, Aspirin, Etizolam, Elavil",
+        prescription: member.medicine || "Metformin, Januvia, Acebutolol, Betaxolol, Aspirin, Etizolam, Elavil",
       });
     }
   }, [member]);
@@ -92,29 +87,10 @@ const EditMember = () => {
         return;
       }
 
-      if (response.ok) {
-        toast.success("Member updated successfully!", {
-          position: "top-right",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          draggable: true,
-          progress: undefined,
-          onClose: () => {
-            navigate("/dashboard");
-          },
-        });
-      }
+      alert("✅ Member updated successfully!");
+      navigate("/dashboard");
     } catch (error) {
-      toast.error("Server error: " + error.message, {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      alert("Server error: " + error.message);
     }
   };
 
@@ -124,17 +100,6 @@ const EditMember = () => {
 
   return (
     <div className="new-member-container">
-      <ToastContainer
-        position="top-right"
-        autoClose={2000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
       <header>
         <div className="header-left">
           <img src={medlife} alt="MedLife AI Logo" className="logo" />
@@ -150,8 +115,7 @@ const EditMember = () => {
       </header>
 
       <main className="new-member-main">
-        Update the member information below and then press UPDATE at the bottom
-        of the screen
+        Update the member information below and then press UPDATE at the bottom of the screen
       </main>
 
       <div className="new-member-form-container">

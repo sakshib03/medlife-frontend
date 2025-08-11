@@ -3,38 +3,49 @@
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
+  padding-top: 80px; /* make room for fixed header */
+  box-sizing: border-box;
 }
 
-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 60px;
-    background-color: #fe786b;
-    padding: 10px 20px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    z-index: 1000;
+/* Header (fixed) */
+header,
+.dash-header { /* allow either <header> or .dash-header usage */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background-color: #fe786b;
+  padding: 10px 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 1000;
 }
 
 .header-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Align things on the right side of header cleanly */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .logo {
-    width: 50px;
-    height: 50px;
+  width: 50px;
+  height: 50px;
 }
 
 .title {
-    font-size: 18px;
-    color: #f7f3f3;
-    font-weight: bold;
+  font-size: 18px;
+  color: #f7f3f3;
+  font-weight: bold;
 }
 
 .dashboard-container{
@@ -45,14 +56,72 @@ header {
 
 .logout{
   background-color: #d94343;
-  padding: 8px;
-  padding-left: 20px;
-  padding-right: 20px;
+  padding: 8px 20px;
   border-radius: 20px;
   cursor: pointer;
   color: white;
+  border: none;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.logout:hover {
+  transform: translateY(-1px);
+  opacity: 0.95;
 }
 
+/* --- User badge (clean, centered, truncation-safe) --- */
+/* --- User badge (clean, centered, truncation-safe) --- */
+.user-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(180deg, #ffd6c7 0%, #ffc2a8 100%); /* soft peach gradient */
+  border-radius: 9999px;  
+  padding: 3px 14px;
+  color: #4b2c21;
+  box-shadow: 0 4px 14px rgba(255, 140, 102, 0.28);
+  border: 1px solid rgba(200, 90, 50, 0.15);
+  max-width: 360px;
+}
+
+.user-name {
+  font-weight: 700;
+  font-size: 14px;
+  color: #7a3b2e; /* darker peach-brown for text */
+}
+
+.user-email {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9c4f3d; /* medium warm tone */
+}
+
+
+.user-icon {
+  flex: 0 0 auto;
+}
+
+.user-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+  min-width: 0;          /* enables text truncation below */
+}
+
+
+/* Responsive tighten */
+@media (max-width: 520px) {
+  .user-badge {
+    max-width: 240px;
+    padding: 6px 12px;
+    gap: 8px;
+  }
+  .title {
+    font-size: 16px;
+  }
+}
+
+/* --- Main table + content --- */
 .dashboard-title {
   text-align: center;
   color: #333;
@@ -76,15 +145,13 @@ header {
 
 .members-table th {
   background-color: #f2f2f2;
-  padding: 12px;
-  padding-left: 32px;
+  padding: 12px 24px;
   text-align: left;
   border: 2px solid #ddd;
 }
 
 .members-table td {
-  padding: 12px;
-  padding-left: 32px;
+  padding: 12px 24px;
   border: 2px solid #ddd;
 }
 
@@ -99,12 +166,12 @@ header {
   padding: 6px 22px;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s, transform 0.15s ease;
   font-size: 14px;
 }
-
 .start-btn:hover {
   background-color: #45a049;
+  transform: translateY(-1px);
 }
 
 .edit-icon, .pdf-icon {
@@ -123,11 +190,11 @@ header {
   display: block;
   margin: 20px auto;
   font-size: 14px;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s, transform 0.15s ease;
 }
-
 .add-member-btn:hover {
   background-color: #0b7dda;
+  transform: translateY(-1px);
 }
 
 .member-limit {
@@ -142,12 +209,10 @@ header {
   border-left: 4px solid #2196F3;
   margin-top: 30px;
 }
-
 .note-section h3 {
   margin-top: 0;
   color: #333;
 }
-
 .note-section p {
   margin-bottom: 0;
   color: #555;
@@ -190,7 +255,7 @@ header {
   color: #555;
 }
 
-/* Add Member Form Styles (from your AddMember.css) */
+/* Add Member Form Styles */
 .new-member-container {
   font-family: 'Arial', sans-serif;
   background-color: #eee9ff;
@@ -287,7 +352,6 @@ header {
 .new-member-add-btn {
   background-color: #27AE60;
 }
-
 .new-member-add-btn:hover {
   background-color: #219150;
 }
@@ -295,7 +359,6 @@ header {
 .new-member-cancel-btn {
   background-color: #ee101b;
 }
-
 .new-member-cancel-btn:hover {
   background-color: #C0392B;
 }

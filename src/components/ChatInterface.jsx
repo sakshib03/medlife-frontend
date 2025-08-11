@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./css_files/ChatInterface.css";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 import cloudIcon from "../assets/images/cloud.jpg";
 import userIcon from "../assets/images/Depth 6, Frame 0.png";
@@ -10,7 +8,7 @@ import settings from "../assets/images/Depth 4, Frame 1.png";
 import medlife from "../assets/v987-18a-removebg-preview.png";
 
 import { useNavigate, useLocation } from "react-router-dom";
-import { Send, Download, Home } from "lucide-react";
+import { Send, Download, Home, Pencil } from "lucide-react";
 
 const ChatInterface = () => {
   const navigate = useNavigate();
@@ -18,6 +16,9 @@ const ChatInterface = () => {
   const [userInput, setUserInput] = useState("");
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const [editable, setEditable] = useState(false);
+  const [showKey, setShowKey] = useState(false);
 
   // Add a special loading message id to track loading message
   const loadingMessageId = "loading-message";
@@ -49,7 +50,10 @@ const ChatInterface = () => {
     localStorage.getItem("apiKey") || ""
   );
   const [showApiKeyPopup, setShowApiKeyPopup] = useState(false);
+  const [popupClosedWithoutKey, setPopupClosedWithoutKey] = useState(false);
   const [isApiKeyRequired, setIsApiKeyRequired] = useState(true);
+
+  const displayValue = showKey || editable ? apiKey : apiKey.replace(/./g, "•");
 
   const appendMessage = (sender, name, text) => {
     const newMessage = {
@@ -68,7 +72,14 @@ const ChatInterface = () => {
     // Check if API key is available
     const apiKey = getUserApiKey();
     if (!apiKey) {
-      setShowApiKeyPopup(true);
+      if (popupClosedWithoutKey) {
+        alert(
+          `Please enter your API key for ${selectedAPI.toUpperCase()} to start chat.`
+        );
+        setShowApiKeyPopup(true);
+      } else {
+        setShowApiKeyPopup(true);
+      }
       return;
     }
 
@@ -94,9 +105,11 @@ const ChatInterface = () => {
       const response = await fetch(
         `http://localhost:8000/medlife/ask_ai/?query=${encodeURIComponent(
           message
-        )}&api_key=${encodeURIComponent(apiKey)}&email=${encodeURIComponent(
-          email
-        )}&member_data=${encodeURIComponent(memberData)}`
+        )}&api_key=${encodeURIComponent(apiKey)}&provider=${encodeURIComponent(
+          selectedAPI
+        )}&email=${encodeURIComponent(email)}&member_data=${encodeURIComponent(
+          memberData
+        )}`
       );
 
       if (!response.ok) {
@@ -178,27 +191,10 @@ const ChatInterface = () => {
         throw new Error("Failed to save chat data");
       }
 
-      if (response.ok) {
-        toast.success("Chat saved to server successfully.", {
-          position: "top-right",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          draggable: true,
-          progress: undefined,
-        });
-      }
+      alert("Chat saved to server successfully.");
     } catch (error) {
       console.error("Error saving chat data:", error);
-      toast.error("Error saving chat data. Please try again.", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      alert("Error saving chat data. Please try again.");
     }
   };
 
@@ -322,17 +318,6 @@ const ChatInterface = () => {
 
   return (
     <div className="chat-section-interface">
-      <ToastContainer
-        position="top-right"
-        autoClose={2000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
       <header>
         <div className="header-left">
           <img src={medlife} alt="MedLife AI Logo" className="logo" />
@@ -473,9 +458,35 @@ const ChatInterface = () => {
 
         <div className="main-content">
           <div className="chat-main">
-            <div className="chat-header">
-              <h1>Medlife Assist</h1>
-              <p>Would like to talk about your Health?</p>
+            <div className="chat-header" style={{ position: "relative", display: "flex"}}>
+              <div>
+                <h1>Medlife Assist</h1>
+                <p>Would like to talk about your Health?</p>
+              </div>
+              <div style={{marginTop: "50px", marginLeft:"400px"}}>
+                <h2 style={{ marginBottom: "10px", textAlign: "left", color:"#fe786b" }}>
+                  Please select your AI provider
+                </h2>
+
+                <select
+                  value={selectedAPI}
+                  onChange={(e) => setSelectedAPI(e.target.value)}
+                  style={{
+                    marginBottom: "10px",
+                    padding: "5px",
+                    borderRadius: "4px",
+                    border: "1px solid #ccc",
+                    width: "100%",
+                  }}
+                >
+                  <option value="">Select AI Provider</option>
+                  <option value="openai">OpenAI</option>
+                  <option value="gemini">Gemini</option>
+                  <option value="claude">Claude</option>
+                  <option value="mistral">Mistral</option>
+                  <option value="ollama">Ollama</option>
+                </select>
+              </div>
             </div>
 
             <div className="chat-messages" ref={chatMessagesRef}>
@@ -507,7 +518,7 @@ const ChatInterface = () => {
                 placeholder={
                   localStorage.getItem("apiKey")
                     ? "Type your question here..."
-                    : "Please enter your API key first..."
+                    : "Please enter your API key first from the settings or refreshing the page to start chat..."
                 }
                 disabled={!localStorage.getItem("apiKey")}
               />
@@ -549,6 +560,7 @@ const ChatInterface = () => {
               className="modal-close-btn"
               onClick={() => {
                 setIsSettings(false);
+                setPopupClosedWithoutKey(true);
                 // Reset to current saved values on cancel
                 const currentAPI = localStorage.getItem("selectedAPI") || "";
                 const currentKey = localStorage.getItem("apiKey") || "";
@@ -563,7 +575,7 @@ const ChatInterface = () => {
               <p className="modal-subtitle">Current AI Provider and API Key</p>
               <div className="api-providers-list">
                 <p className="modal-subtitle">Select AI Provider</p>
-                {["openai", "gemini", "cloude", "mistral", "ollama"].map(
+                {["openai", "gemini", "claude", "mistral", "ollama"].map(
                   (provider) => {
                     const isCurrent =
                       localStorage.getItem("selectedAPI") === provider;
@@ -605,18 +617,37 @@ const ChatInterface = () => {
                 )}
               </div>
 
-              <div className="api-key-input">
+              <div className="api-key-input" style={{ position: "relative" }}>
                 <label htmlFor="apiKey">
                   {selectedAPI ? selectedAPI.toUpperCase() : "Select Provider"}{" "}
                   API Key
                 </label>
-                <input
-                  type="text"
-                  id="apiKey"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  placeholder="Enter your API key"
-                />
+                <div style={{ position: "relative" }}>
+                  <input
+                    type="text"
+                    id="apiKey"
+                    value={displayValue}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    placeholder="Enter your API key"
+                    readOnly={!editable}
+                    style={{ paddingRight: "32px" }}
+                  />
+                  <Pencil
+                    size={18}
+                    style={{
+                      position: "absolute",
+                      right: "8px",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      cursor: "pointer",
+                      color: editable ? "#000" : "#888",
+                    }}
+                    onClick={() => {
+                      setEditable((prev) => !prev);
+                      setShowKey(true);
+                    }}
+                  />
+                </div>
                 <small>
                   Your API key will be stored securely in your browser's local
                   storage
@@ -653,6 +684,25 @@ const ChatInterface = () => {
       {showApiKeyPopup && (
         <div className="modal-overlay">
           <div className="modal-content api-key-modal">
+            <button
+              className="modal-close-btn"
+              onClick={() => {
+                setShowApiKeyPopup(false);
+                setPopupClosedWithoutKey(true);
+              }}
+              style={{
+                position: "absolute",
+                top: "10px",
+                right: "10px",
+                background: "none",
+                border: "none",
+                fontSize: "20px",
+                cursor: "pointer",
+                color: "#999",
+              }}
+            >
+              ✖
+            </button>
             <h2>Enter Your AI API Key</h2>
             <p
               style={{ marginBottom: "15px", fontSize: "14px", color: "#666" }}

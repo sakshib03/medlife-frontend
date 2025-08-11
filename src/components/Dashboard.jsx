@@ -2,10 +2,13 @@ import React, { useState, useEffect } from "react";
 import "./css_files/Dashboard.css";
 import medlife from "../assets/v987-18a-removebg-preview.png";
 import { useNavigate } from "react-router-dom";
-import { Edit, Download, Delete } from "lucide-react";
+import { Edit, Download, User } from "lucide-react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+
+  const [userEmail, setUserEmail] = useState("");
+  const [userName, setUserName] = useState("");
 
   // 🔁 START WITH EMPTY MEMBER LIST
   const [data, setData] = useState([]);
@@ -13,6 +16,30 @@ const Dashboard = () => {
 
   // Fetch members on component mount
   useEffect(() => {
+    const email = localStorage.getItem("userEmail") || "";
+    setUserEmail(email);
+
+    if (email) {
+      fetch(
+        `http://localhost:8000/api/get-username?email=${encodeURIComponent(
+          email
+        )}`
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.username) {
+            setUserName(data.username);
+          } else {
+            setUserName("User");
+          }
+        })
+        .catch(() => {
+          setUserName("User");
+        });
+    } else {
+      setUserName("User");
+    }
+
     fetchMembers();
   }, []);
 
@@ -65,66 +92,39 @@ const Dashboard = () => {
     }
 
     try {
-      console.log("Fetching member details for:", member);
       const response = await fetch(
         `http://localhost:8000/api/member-details/${encodeURIComponent(
           email
         )}/${member.memberIndex}`
       );
-
       if (!response.ok) {
         throw new Error("Failed to fetch member details");
       }
-
       const data = await response.json();
-      console.log("Fetched member details:", data);
-
-      // Store member details in localStorage for chat context
       localStorage.setItem("currentMember", JSON.stringify(data.member));
-      console.log(
-        "Stored currentMember in localStorage:",
-        localStorage.getItem("currentMember")
-      );
-
-      // Navigate to chat with member context
       navigate("/medlife/prompt", {
-        state: {
-          member: data.member,
-          memberName: member.name,
-        },
+        state: { member: data.member, memberName: member.name },
       });
     } catch (error) {
-      console.error("Error fetching member details:", error);
       alert("Failed to load member details. Please try again.");
     }
   };
 
-  const handleEditMember = async (member) => {
-    const email = localStorage.getItem("userEmail");
-    if (!email) {
-      alert("User not logged in");
-      return;
-    }
-
-    // Implement edit member functionality
-    // This would typically open a modal or redirect to an edit form
-    // For now, we'll log the member details and provide a basic edit interface
-    console.log("Editing member:", member);
-
-    // Example implementation - redirect to edit page with member details
+  const handleEditMember = (member) => {
     navigate("/medlife/editmember", { state: { member: member } });
   };
 
   return (
     <div className="dashboard">
-      <header>
+      {/* Polished header with user badge styles from Dashboard.css */}
+      <header className="dash-header">
         <div className="header-left">
           <img src={medlife} alt="MedLife AI Logo" className="logo" />
-          <div>
-            <h1 className="title">MedLife AI</h1>
-          </div>
+          <h1 className="title">MedLife AI</h1>
         </div>
-        <div>
+
+        <div className="header-right">
+          <UserBadge name={userName || "User"} email={userEmail || "No email"} />
           <button className="logout" onClick={() => navigate("/")}>
             Logout
           </button>
@@ -156,7 +156,7 @@ const Dashboard = () => {
                         color: "#999",
                       }}
                     >
-                      No members yet. Click "Add New Member" to begin.
+                      No members yet. Click "+ Add New Member" to begin.
                     </td>
                   </tr>
                 ) : (
@@ -207,6 +207,11 @@ const Dashboard = () => {
                                 const data = await response.json();
                                 const messages = data.chat || [];
 
+                                if (messages.length === 0) {
+                                  alert("Start chat first before downloading PDF");
+                                  return;
+                                }
+
                                 // Import and use getPdf
                                 const { default: generatePDF } = await import(
                                   "./getPdf.jsx"
@@ -240,7 +245,8 @@ const Dashboard = () => {
                             className="start-btn"
                             style={{ backgroundColor: "red" }}
                             onClick={async () => {
-                              const email = localStorage.getItem("userEmail");
+                              const email =
+                                localStorage.getItem("userEmail");
                               if (!email) {
                                 alert("User not logged in");
                                 return;
@@ -300,13 +306,26 @@ const Dashboard = () => {
           <div className="note-section">
             <h3>Note:</h3>
             <p>
-              To save the chat to the cloud, click on the Cloud icon in the chat
-              box next to the send button. For reference, download a PDF of your
-              chat history by clicking the Download icon next to the Cloud
+              To save the chat to the cloud, click on the Cloud icon in the
+              chat box next to the send button. For reference, download a PDF of
+              your chat history by clicking the Download icon next to the Cloud
               Button in the chat box.
             </p>
           </div>
         </div>
+      </div>
+    </div>
+  );
+};
+
+/** Small presentational component for the header pill */
+const UserBadge = ({ name, email }) => {
+  return (
+    <div className="user-badge" title={`${name} (${email})`}>
+      <User size={18} className="user-icon" />
+      <div className="user-text">
+            <span className="user-name" >{name}</span>
+            <span className="user-email" >({email})</span>
       </div>
     </div>
   );

@@ -6,14 +6,12 @@ import sidelogo from "../assets/signup.png";
 import medlife from "../assets/v987-18a-removebg-preview.png";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
 
 const SignIn = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth();
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -30,25 +28,26 @@ const SignIn = () => {
         body: JSON.stringify({ login: username, password })
       });
       const data = await response.json();
-      if (response.ok) {
-        // Store logged-in user's email in localStorage
-        login(data.email);
-
+        if (response.ok) {
+        // Store access token in localStorage
+        localStorage.setItem("accessToken", data.access_token);
+        localStorage.setItem("userEmail", data.email);
 
         toast.success('Login successful!', {
           position: "top-right",
-          autoClose: 2000,
+          autoClose: 3000,
           hideProgressBar: false,
           closeOnClick: true,
           draggable: true,
           progress: undefined,
-onClose: () => navigate("/disclaimer") // Redirect to disclaimer page after login
-          
+onClose: () => {
+            navigate("/disclaimer"); // Redirect to disclaimer page after login
+          },
         });
       } else {
         toast.error(data.detail || "Invalid email or password.", {
           position: "top-right",
-          autoClose: 2000,
+          autoClose: 3000,
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
@@ -59,7 +58,7 @@ onClose: () => navigate("/disclaimer") // Redirect to disclaimer page after logi
     } catch (error) {
       toast.error("An error occurred. Please try again later.", {
         position: "top-right",
-        autoClose: 2000,
+        autoClose: 5000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
@@ -164,6 +163,7 @@ onClose: () => navigate("/disclaimer") // Redirect to disclaimer page after logi
                 Sign Up
               </button>
             </p>
+
           </form>
         </div>
 

@@ -14,7 +14,43 @@ const SignUp = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
   const navigate=useNavigate();
+
+  // Email validation function
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // Password validation function
+  const validatePassword = (password) => {
+    const minLength = 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+
+    if (password.length < minLength) {
+      return "Password must be at least 8 characters long";
+    }
+    if (!hasUpperCase) {
+      return "Password must contain at least one uppercase letter";
+    }
+    if (!hasLowerCase) {
+      return "Password must contain at least one lowercase letter";
+    }
+    if (!hasNumber) {
+      return "Password must contain at least one numeric digit";
+    }
+    if (!hasSpecialChar) {
+      return "Password must contain at least one special character (!@#$%^&*()_+-=[]{}|;:,.<>?)";
+    }
+    return "";
+  };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -35,7 +71,7 @@ const SignUp = () => {
       if (response.ok) {
         toast.success('Signup successful!', {
           position: "top-right",
-          autoClose: 2000,
+          autoClose: 5000,
           hideProgressBar: false,
           closeOnClick: true,
           draggable: true,
@@ -47,7 +83,7 @@ const SignUp = () => {
       } else {
         toast.error(data.detail || 'Signup failed.', {
           position: "top-right",
-          autoClose: 2000,
+          autoClose: 5000,
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
@@ -58,7 +94,7 @@ const SignUp = () => {
     } catch (error) {
       toast.error('An error occurred. Please try again later.', {
         position: "top-right",
-        autoClose: 2000,
+        autoClose: 5000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
@@ -73,7 +109,7 @@ const SignUp = () => {
 
     <ToastContainer
         position="top-right"
-        autoClose={2000}
+        autoClose={5000}
         hideProgressBar={false}
         newestOnTop={false}
         closeOnClick
@@ -123,9 +159,25 @@ const SignUp = () => {
               type="text"
               id="email-address"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (emailFocused) {
+                  const emailValid = validateEmail(e.target.value);
+                  setEmailError(emailValid ? "" : "Invalid email format");
+                }
+              }}
+              onFocus={() => setEmailFocused(true)}
+              onBlur={() => setEmailFocused(false)}
               required
             />
+            {emailFocused && (
+              <p style={{ color: "red", fontSize: "12px" }}>
+                Please enter a valid email address (e.g. user@example.com)
+              </p>
+            )}
+            {emailError && !emailFocused && (
+              <p style={{ color: "red", fontSize: "12px" }}>{emailError}</p>
+            )}
 
           
 
@@ -140,10 +192,26 @@ const SignUp = () => {
                 type={showPassword ? "text" : "password"}
                 id="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (passwordFocused) {
+                    const passwordValidationError = validatePassword(e.target.value);
+                    setPasswordError(passwordValidationError);
+                  }
+                }}
+                onFocus={() => setPasswordFocused(true)}
+                onBlur={() => setPasswordFocused(false)}
                 required
                 style={{ paddingRight: "30px" }} // Add padding to prevent text under the icon
               />
+              {passwordFocused && (
+                <p style={{ color: "red", fontSize: "12px" }}>
+                  Password must be at least 8 characters long, contain uppercase, lowercase, and special character.
+                </p>
+              )}
+              {passwordError && !passwordFocused && (
+                <p style={{ color: "red", fontSize: "12px" }}>{passwordError}</p>
+              )}
               <button
                 type="button"
                 onClick={togglePasswordVisibility}
@@ -182,6 +250,7 @@ const SignUp = () => {
                 Sign In
               </a>
             </p>
+
           </form>
         </div>
 

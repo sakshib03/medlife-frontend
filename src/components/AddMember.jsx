@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import "./css_files/AddMember.css";
 import medlife from "../assets/v987-18a-removebg-preview.png";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 const AddMember = () => {
   const navigate = useNavigate();
@@ -75,29 +73,10 @@ const AddMember = () => {
         return;
       }
 
-      if (response.ok) {
-        toast.success("Member added successfully!", {
-          position: "top-right",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          draggable: true,
-          progress: undefined,
-          onClose: () => {
-            navigate("/dashboard");
-          },
-        });
-      }
+      alert("✅ Member added successfully!");
+      navigate("/dashboard"); // ✅ Redirect after success
     } catch (error) {
-      toast.error("Server error: " + error.message, {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      alert("Server error: " + error.message);
     }
   };
 
@@ -159,17 +138,6 @@ const AddMember = () => {
 
   return (
     <div className="new-member-container">
-      <ToastContainer
-        position="top-right"
-        autoClose={2000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
       <header>
         <div className="header-left">
           <img src={medlife} alt="MedLife AI Logo" className="logo" />
@@ -320,3 +288,4 @@ const AddMember = () => {
 };
 
 export default AddMember;
+
