@@ -29,6 +29,7 @@ const ChatInterface = () => {
   const chatMessagesRef = useRef(null);
   const [selectedMember, setSelectedMember] = useState(null);
 
+  const [data, setData] = useState([]);
   // ===== UI state =====
   const [isSettings, setIsSettings] = useState(false);
   const [showApiKeyPopup, setShowApiKeyPopup] = useState(false);
@@ -136,7 +137,10 @@ const ChatInterface = () => {
 
     if (!selectedAPI || !(apiKeys[selectedAPI] || "").trim()) {
       if (popupClosedWithoutKey) {
-        toast.warn("Please enter an API key in settings, then choose a provider.", { autoClose: 2000 });
+        toast.warn(
+          "Please enter an API key in settings, then choose a provider.",
+          { autoClose: 2000 }
+        );
       }
       setShowApiKeyPopup(true);
       return;
@@ -206,7 +210,9 @@ const ChatInterface = () => {
 
   const handleSaveChat = async () => {
     if (!email || !selectedMember) {
-      toast.warn("No member selected or user email missing.",{ autoClose: 2000 });
+      toast.warn("No member selected or user email missing.", {
+        autoClose: 2000,
+      });
       return;
     }
     try {
@@ -232,13 +238,17 @@ const ChatInterface = () => {
       });
     } catch (err) {
       console.error("Error saving chat:", err);
-      toast.error("Error saving chat data. Please try again.", { autoClose: 2000 });
+      toast.error("Error saving chat data. Please try again.", {
+        autoClose: 2000,
+      });
     }
   };
 
   const handleDownloadChat = () => {
     if (!email || !selectedMember) {
-      toast.warn("No member selected or user email missing.", { autoClose: 2000 });
+      toast.warn("No member selected or user email missing.", {
+        autoClose: 2000,
+      });
       return;
     }
     import("./getPdf.jsx")
@@ -253,7 +263,9 @@ const ChatInterface = () => {
       })
       .catch((err) => {
         console.error("Error loading PDF generator:", err);
-        toast.error("Error generating PDF. Please try again.", { autoClose: 2000 });
+        toast.error("Error generating PDF. Please try again.", {
+          autoClose: 2000,
+        });
       });
   };
 
@@ -308,6 +320,30 @@ const ChatInterface = () => {
     setShowApiKeyPopup(false);
   };
 
+  useEffect(() => {
+    const email = localStorage.getItem("userEmail");
+    if (!email) return;
+
+    fetch(
+      `http://localhost:8000/medlife/getmember?email=${encodeURIComponent(
+        email
+      )}`
+    )
+      .then((res) => res.json())
+      .then((result) => {
+        if (result.members) {
+          const members = result.members
+            .map((member, index) => ({
+              name: `${member.firstName} ${member.lastName}`,
+              memberIndex: index + 1,
+              ...member,
+            }))
+            .filter((m) => m.firstName);
+          setData(members);
+        }
+      });
+  }, []);
+
   // ===== Render =====
   return (
     <div className="chat-section-interface">
@@ -344,6 +380,45 @@ const ChatInterface = () => {
 
       <div className="chat-container">
         <div className="sidebar">
+          {/* Member selection dropdown */}
+          <div
+            style={{ marginTop: "60px", textAlign: "left", marginLeft: "10px" }}
+          >
+            <h2
+              style={{
+                marginBottom: 8,
+                textAlign: "left",
+                color: "#fe786b",
+                fontSize: 16,
+              }}
+            >
+              Please select member
+            </h2>
+            <select
+              value={selectedAPI}
+              onChange={(e) => setSelectedAPI(e.target.value)}
+              style={{
+                marginBottom: 2,
+                padding: "6px 8px",
+                borderRadius: 6,
+                border: "1px solid #ccc",
+                width: "70%",
+                color: "black",
+              }}
+            >
+              {data.length > 0 && <option value="">Select Member</option>}
+              {data.map((member) => (
+                <option
+                  key={member.memberIndex}
+                  value={member.memberIndex}
+                  style={{ backgroundColor: "#fe8f85;" }}
+                >
+                  {member.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div>
             <h3>Recommended Health Questions</h3>
             <ul>
@@ -379,38 +454,26 @@ const ChatInterface = () => {
             </ul>
           </div>
 
+          <div
+           style={{
+              display: "flex",
+              alignItems: "center",
+              MarginLeft: "60px",
+              justifyContent: "center",
+              gap: "6px",
+              backgroundColor:"#fe786b",
+              width:"200px"
+            }}>
+            <button>+</button>
+
+          </div>
+
           <div>
-            <h3>Optional Questions</h3>
+            <h3>Chats</h3>
             <ul>
-              <li
-                onClick={() =>
-                  handleQuestionSelect(
-                    "Could you display the two most influential medical articles for me?"
-                  )
-                }
-              >
-                Could you display the two most influential medical articles for
-                me?
-              </li>
-              <li
-                onClick={() =>
-                  handleQuestionSelect(
-                    "Can you provide summaries of both articles, limited to 150 words each?"
-                  )
-                }
-              >
-                Can you provide summaries of both articles, limited to 150 words
-                each?
-              </li>
-              <li
-                onClick={() =>
-                  handleQuestionSelect(
-                    "Are there any clinical trials which would interest me?"
-                  )
-                }
-              >
-                Are there any clinical trials which would interest me?
-              </li>
+              <li>Chat 1</li>
+              <li>Chat 2</li>
+              <li>Chat 3</li>
             </ul>
           </div>
 
@@ -426,35 +489,6 @@ const ChatInterface = () => {
           >
             <Home size={18} />
             Dashboard
-          </div>
-
-          <div style={{ marginTop: "6px", textAlign: "center" }}>
-            {selectedMember ? (
-              <div
-                onClick={() => navigate("/dashboard")}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  padding: "6px 12px",
-                  backgroundColor: "#e0f7fa",
-                  color: "#fe8f85",
-                  fontWeight: "600",
-                  borderRadius: "12px",
-                  fontSize: "0.95rem",
-                  border: "1px solid #fe8f85",
-                  cursor: "pointer",
-                  transition: "all 0.3s ease-in-out",
-                }}
-                title="Chatbot has this member's data"
-              >
-                {selectedMember.fullName}
-              </div>
-            ) : (
-              <span style={{ color: "#999", fontStyle: "italic" }}>
-                No member selected
-              </span>
-            )}
           </div>
         </div>
 
@@ -473,7 +507,7 @@ const ChatInterface = () => {
                 <p>Would like to talk about your Health?</p>
               </div>
 
-              <div style={{ alignSelf: "flex-end", minWidth: 260 }}>
+              <div style={{ alignSelf: "flex-end", minWidth: 100 }}>
                 <h2
                   style={{
                     marginBottom: 8,
@@ -511,9 +545,6 @@ const ChatInterface = () => {
                     </option>
                   ))}
                 </select>
-                <small style={{ color: "#666" }}>
-                  Only providers with saved keys are listed here.
-                </small>
               </div>
             </div>
 
@@ -593,9 +624,20 @@ const ChatInterface = () => {
             >
               Current AI Providers and API Keys
             </h2>
+
             <div className="api-providers-list">
               {PROVIDERS.map((provider) => {
                 const hasKey = (apiKeys[provider] || "").trim() !== "";
+
+                // Masking function: show only first 3 & last 3 chars
+                const maskApiKey = (key) => {
+                  if (!key) return "";
+                  if (key.length <= 6) return key;
+                  return `${key.slice(0, 3)}${"*".repeat(
+                    key.length - 6
+                  )}${key.slice(-3)}`;
+                };
+
                 return (
                   <div
                     key={provider}
@@ -618,10 +660,27 @@ const ChatInterface = () => {
                     >
                       {properName(provider)} Key
                     </label>
+
                     <input
                       type="text"
                       id={`apiKey-${provider}`}
-                      value={apiKeys[provider]}
+                      value={
+                        hasKey
+                          ? maskApiKey(apiKeys[provider])
+                          : apiKeys[provider]
+                      }
+                      onFocus={(e) => {
+                        // Show full key when input is focused
+                        if (hasKey) {
+                          e.target.value = apiKeys[provider];
+                        }
+                      }}
+                      onBlur={(e) => {
+                        // Re-mask when input loses focus
+                        if (hasKey) {
+                          e.target.value = maskApiKey(apiKeys[provider]);
+                        }
+                      }}
                       onChange={(e) =>
                         setApiKeys({ ...apiKeys, [provider]: e.target.value })
                       }
@@ -636,14 +695,20 @@ const ChatInterface = () => {
                       }}
                       readOnly={false}
                     />
+
                     {hasKey && (
                       <svg
                         onClick={() => {
-                          // Just focus input on pencil click, do not clear value
                           const input = document.getElementById(
                             `apiKey-${provider}`
                           );
-                          if (input) input.focus();
+                          if (input) {
+                            input.focus();
+                            input.setSelectionRange(
+                              input.value.length,
+                              input.value.length
+                            );
+                          }
                         }}
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
@@ -709,7 +774,15 @@ const ChatInterface = () => {
               ✖
             </button>
 
-            <h2 style={{marginBottom: "10px", color:"#fe8f85", fontSize:"20px"}}>Enter Your AI API Keys</h2>
+            <h2
+              style={{
+                marginBottom: "10px",
+                color: "#fe8f85",
+                fontSize: "20px",
+              }}
+            >
+              Enter Your AI API Keys
+            </h2>
 
             <div className="api-providers-list">
               {PROVIDERS.map((provider) => (

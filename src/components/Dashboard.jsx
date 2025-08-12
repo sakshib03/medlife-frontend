@@ -4,7 +4,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "./css_files/Dashboard.css";
 import medlife from "../assets/v987-18a-removebg-preview.png";
 import { useNavigate } from "react-router-dom";
-import { Edit, Download, User } from "lucide-react";
+import { Edit, Download, User,Trash  } from "lucide-react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -332,13 +332,13 @@ const Dashboard = () => {
                           </span>
                         </td>
                         <td>
-                          <button
-                            className="start-btn"
-                            style={{ backgroundColor: "red" }}
+                          <span
+                            className="edit-icon"
                             onClick={() => confirmDelete(item)}
+                            style={{ cursor: "pointer" }}
                           >
-                            Delete
-                          </button>
+                           <Trash size={18} />
+                          </span>
                         </td>
                       </tr>
                     ))
@@ -445,7 +445,7 @@ const UserBadge = ({ name, email }) => {
       <User size={18} className="user-icon" />
       <div className="user-text">
         <span className="user-name">{name}</span>
-        <span className="user-email">({email})</span>
+        <span className="user-email">{email}</span>
       </div>
     </div>
   );

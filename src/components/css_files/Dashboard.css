@@ -146,13 +146,14 @@ header,
 .members-table th {
   background-color: #f2f2f2;
   padding: 12px 24px;
-  text-align: left;
+  text-align: center;
   border: 2px solid #ddd;
 }
 
 .members-table td {
   padding: 12px 24px;
   border: 2px solid #ddd;
+  text-align: center;
 }
 
 .members-table tr:hover {
@@ -178,6 +179,7 @@ header,
   color: #4CAF50;
   font-weight: bold;
   cursor: pointer;
+  align-items: center;
 }
 
 .add-member-btn {
