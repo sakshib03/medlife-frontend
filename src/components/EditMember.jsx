@@ -74,7 +74,7 @@ const EditMember = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/medlife/editmember?email=${encodeURIComponent(
+        `https://semantic.onesmarter.com/medlifeV2/editmember?email=${encodeURIComponent(
           email
         )}&member_index=${member?.memberIndex || 1}`,
         {

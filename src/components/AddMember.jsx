@@ -64,7 +64,7 @@ const AddMember = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:8000/medlife/addmember", {
+      const response = await fetch("https://semantic.onesmarter.com/medlifeV2/addmember", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(memberData),
@@ -106,7 +106,7 @@ const AddMember = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/medlife/editmember?email=${encodeURIComponent(
+        `https://semantic.onesmarter.com/medlifeV2/medlife/editmember?email=${encodeURIComponent(
           email
         )}&member_name=${encodeURIComponent(
           formData.firstName + "," + formData.lastName

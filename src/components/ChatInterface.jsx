@@ -26,7 +26,7 @@ import {
 
 const PROVIDERS = ["openai", "gemini", "claude", "mistral"];
 const properName = (p) => p.charAt(0).toUpperCase() + p.slice(1);
-const API_BASE = "http://localhost:8000/medlife";
+const API_BASE = "https://semantic.onesmarter.com/medlifeV2/";
 
 // Prefer stable ids from server; fallback to UUID / timestamp
 const makeId = () =>
@@ -171,7 +171,7 @@ const ChatInterface = () => {
       setMessages([]);
       // best-effort remote sync
       try {
-        await fetch(`${API_BASE}/chats?email=${encodeURIComponent(email)}`, {
+        await fetch(`${API_BASE}chats?email=${encodeURIComponent(email)}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ chats: next }),
@@ -208,7 +208,7 @@ const ChatInterface = () => {
     const loadRemote = async () => {
       try {
         const res = await fetch(
-          `${API_BASE}/chats?email=${encodeURIComponent(email)}`
+          `${API_BASE}chats?email=${encodeURIComponent(email)}`
         );
         if (!res.ok) throw new Error("No remote chats");
         const data = await res.json();
@@ -249,7 +249,7 @@ const ChatInterface = () => {
     setChatHistory(next);
     localStorage.setItem(keyFor("chatHistory"), JSON.stringify(next));
     try {
-      await fetch(`${API_BASE}/chats?email=${encodeURIComponent(email)}`, {
+      await fetch(`${API_BASE}chats?email=${encodeURIComponent(email)}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ chats: next }),
@@ -270,8 +270,8 @@ const ChatInterface = () => {
       // fire-and-forget remote sync
       (async () => {
         try {
-          await fetch(`${API_BASE}/chats?email=${encodeURIComponent(email)}`, {
-            method: "PUT",
+          await fetch(`${API_BASE}chats?email=${encodeURIComponent(email)}`, {
+            method: "GET",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ chats: updated }),
           });
@@ -299,7 +299,7 @@ const ChatInterface = () => {
     const em = localStorage.getItem("userEmail");
     if (!em) return;
 
-    fetch(`${API_BASE}/getmember?email=${encodeURIComponent(em)}`)
+    fetch(`${API_BASE}getmember?email=${encodeURIComponent(em)}`)
       .then((res) => res.json())
       .then((result) => {
         if (result?.members) {
@@ -456,7 +456,7 @@ const ChatInterface = () => {
     // try server delete (optional)
     try {
       await fetch(
-        `${API_BASE}/chats/${encodeURIComponent(
+        `${API_BASE}chats/${encodeURIComponent(
           chatId
         )}?email=${encodeURIComponent(email)}`,
         {
@@ -530,7 +530,7 @@ const ChatInterface = () => {
     try {
       const memberData = selectedMember ? JSON.stringify(selectedMember) : "";
       const res = await fetch(
-        `${API_BASE}/ask_ai/?query=${encodeURIComponent(
+        `${API_BASE}ask_ai/?query=${encodeURIComponent(
           message
         )}&api_key=${encodeURIComponent(
           apiKeys[selectedAPI]
@@ -587,7 +587,7 @@ const ChatInterface = () => {
       return;
     }
     try {
-      const url = `${API_BASE}/saveChat/?email=${encodeURIComponent(
+      const url = `${API_BASE}saveChat/?email=${encodeURIComponent(
         email
       )}&member_name=${encodeURIComponent(
         `${selectedMember.firstName}_${selectedMember.lastName}`
@@ -806,7 +806,7 @@ const ChatInterface = () => {
                 style={{
                   maxHeight: "350px",
                   overflowY: "auto",
-                  paddingLeft: 0,
+                  paddingLeft: "10px",
                   scrollBehavior: "smooth",
                 }}
               >
@@ -868,7 +868,7 @@ const ChatInterface = () => {
                         </span>
                       )}
                     </>
-                    <div style={{ display: "flex", gap: 4 }}>
+                    <div style={{ display: "flex", gap: 8 }}>
                       <Pencil
                         size={14}
                         onClick={(e) => {
@@ -1001,7 +1001,6 @@ const ChatInterface = () => {
                       <option
                         key={member.memberIndex}
                         value={member.memberIndex}
-                        style={{ backgroundColor: "#fe8f85" }}
                       >
                         {member.name}
                       </option>
@@ -1042,7 +1041,6 @@ const ChatInterface = () => {
                       <option
                         key={p}
                         value={p}
-                        style={{ backgroundColor: "#fe8f85" }}
                       >
                         {properName(p)}
                       </option>

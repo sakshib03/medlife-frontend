@@ -25,7 +25,7 @@ const Dashboard = () => {
 
     if (email) {
       fetch(
-        `http://localhost:8000/api/get-username?email=${encodeURIComponent(
+        `https://semantic.onesmarter.com/medlifeV2/get-username?email=${encodeURIComponent(
           email
         )}`
       )
@@ -56,7 +56,7 @@ const Dashboard = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/medlife/getmember?email=${encodeURIComponent(
+        `https://semantic.onesmarter.com/medlifeV2/getmember?email=${encodeURIComponent(
           email
         )}`
       );
@@ -97,7 +97,7 @@ const Dashboard = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/member-details/${encodeURIComponent(
+        `https://semantic.onesmarter.com/medlifeV2/member-details/${encodeURIComponent(
           email
         )}/${member.memberIndex}`
       );
@@ -135,7 +135,7 @@ const Dashboard = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/medlife/deletemember?email=${encodeURIComponent(
+        `https://semantic.onesmarter.com/medlifeV2/deletemember?email=${encodeURIComponent(
           email
         )}&member_index=${memberToDelete.memberIndex}`,
         {
@@ -260,7 +260,7 @@ const Dashboard = () => {
                               try {
                                 // Fetch chat data from backend
                                 const response = await fetch(
-                                  `http://localhost:8000/medlife/fetchChat/?email=${encodeURIComponent(
+                                  `https://semantic.onesmarter.com/medlifeV2/fetchChat/?email=${encodeURIComponent(
                                     email
                                   )}&member_name=${encodeURIComponent(
                                     item.firstName + "_" + item.lastName

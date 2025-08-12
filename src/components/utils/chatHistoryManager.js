@@ -31,7 +31,7 @@ class ChatHistoryManager {
 
     // Save to server
     try {
-      const response = await fetch(`http://localhost:8000/medlife/saveChat/`, {
+      const response = await fetch(`https://semantic.onesmarter.com/medlifeV2/medlife/saveChat/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -64,7 +64,7 @@ class ChatHistoryManager {
     // Try server
     try {
       const response = await fetch(
-        `http://localhost:8000/medlife/fetchChat/?email=${userEmail}&member_name=${member.name}`
+        `https://semantic.onesmarter.com/medlifeV2/medlife/fetchChat/?email=${userEmail}&member_name=${member.name}`
       );
       
       if (response.ok) {
@@ -96,7 +96,7 @@ class ChatHistoryManager {
 
     // Save to server
     try {
-      await fetch(`http://localhost:8000/medlife/saveChat/`, {
+      await fetch(`https://semantic.onesmarter.com/medlifeV2/medlife/saveChat/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

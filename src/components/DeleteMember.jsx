@@ -25,7 +25,7 @@
 //       const memberName = `${member.firstName},${member.lastName}`;
       
 //       const response = await fetch(
-//         `http://localhost:8000/medlife/removemember?email=${encodeURIComponent(email)}&member_name=${encodeURIComponent(memberName)}`,
+//         `https://semantic.onesmarter.com/medlifeV2/medlife/removemember?email=${encodeURIComponent(email)}&member_name=${encodeURIComponent(memberName)}`,
 //         {
 //           method: "POST",
 //           headers: { "Content-Type": "application/json" },

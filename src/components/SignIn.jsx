@@ -21,7 +21,7 @@ const SignIn = () => {
     event.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:8000/signin", {
+      const response = await fetch("https://semantic.onesmarter.com/medlifeV2/signin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ login: username, password }),
