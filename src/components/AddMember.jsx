@@ -11,7 +11,7 @@ const AddMember = () => {
   const [formData, setFormData] = useState({
     firstName: "John",
     lastName: "Smith",
-    dob: "01/01/1950",
+    dob: "2025-08-13",
     race: "Asian Indian",
     gender: "Male",
     height: "5.10ft",

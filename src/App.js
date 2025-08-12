@@ -9,7 +9,6 @@ import Disclaimer from './components/Disclaimer';
 import ChatInterface from './components/ChatInterface';
 import AddMember from './components/AddMember';
 import EditMember from './components/EditMember';
-import DeleteMember from './components/DeleteMember';
 import PrivateRoute from './components/PrivateRoute';
 
 const App = () => {
@@ -26,7 +25,6 @@ const App = () => {
         <Route path="/medlife/prompt" element={<PrivateRoute element={<ChatInterface />} />} />
         <Route path="/medlife/addmember" element={<PrivateRoute element={<AddMember />} />} />
         <Route path="/medlife/editmember" element={<PrivateRoute element={<EditMember />} />} />
-        <Route path="/medlife/deletemember" element={<PrivateRoute element={<DeleteMember />} />} />
       </Routes>
     </Router>
   );

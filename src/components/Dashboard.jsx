@@ -12,9 +12,11 @@ const Dashboard = () => {
   const [userEmail, setUserEmail] = useState("");
   const [userName, setUserName] = useState("");
 
-  // 🔁 START WITH EMPTY MEMBER LIST
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const [showModal, setShowModal] = useState(false);
+  const [memberToDelete, setMemberToDelete] = useState(null);
 
   // Fetch members on component mount
   useEffect(() => {
@@ -116,6 +118,49 @@ const Dashboard = () => {
 
   const handleEditMember = (member) => {
     navigate("/medlife/editmember", { state: { member: member } });
+  };
+
+  const confirmDelete = (member) => {
+    setMemberToDelete(member);
+    setShowModal(true);
+  };
+
+  const handleDeleteMember = async () => {
+    if (!memberToDelete) return;
+    const email = localStorage.getItem("userEmail");
+    if (!email) {
+      toast.error("User not logged in", { autoClose: 2000 });
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:8000/medlife/deletemember?email=${encodeURIComponent(
+          email
+        )}&member_index=${memberToDelete.memberIndex}`,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      const data = await response.json();
+      if (!response.ok) {
+        toast.error(
+          typeof data === "object"
+            ? JSON.stringify(data)
+            : data || "Failed to delete member",
+          { autoClose: 2000 }
+        );
+        return;
+      }
+      toast.success("Member deleted successfully", { autoClose: 2000 });
+      fetchMembers(); // Refresh the list
+    } catch (error) {
+      toast.error("Server error: " + error.message, { autoClose: 2000 });
+    } finally {
+      setShowModal(false);
+      setMemberToDelete(null);
+    }
   };
 
   return (
@@ -290,54 +335,7 @@ const Dashboard = () => {
                           <button
                             className="start-btn"
                             style={{ backgroundColor: "red" }}
-                            onClick={async () => {
-                              const email = localStorage.getItem("userEmail");
-                              if (!email) {
-                                toast.error("User not logged in", {
-                                  autoClose: 2000,
-                                });
-                                return;
-                              }
-
-                              // Confirm deletion
-                              const confirmDelete = window.confirm(
-                                `Are you sure you want to delete ${item.name}? This action cannot be undone.`
-                              );
-                              if (!confirmDelete) return;
-
-                              try {
-                                const response = await fetch(
-                                  `http://localhost:8000/medlife/deletemember?email=${encodeURIComponent(
-                                    email
-                                  )}&member_index=${item.memberIndex}`,
-                                  {
-                                    method: "DELETE",
-                                    headers: {
-                                      "Content-Type": "application/json",
-                                    },
-                                  }
-                                );
-                                const data = await response.json();
-                                if (!response.ok) {
-                                  toast.error(
-                                    typeof data === "object"
-                                      ? JSON.stringify(data)
-                                      : data || "Failed to delete member",
-                                    { autoClose: 2000 }
-                                  );
-                                  return;
-                                }
-                                toast.success("Member deleted successfully", {
-                                  autoClose: 2000,
-                                });
-                                // Refresh the member list
-                                fetchMembers();
-                              } catch (error) {
-                                toast.error("Server error: " + error.message, {
-                                  autoClose: 2000,
-                                });
-                              }
-                            }}
+                            onClick={() => confirmDelete(item)}
                           >
                             Delete
                           </button>
@@ -366,6 +364,76 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+      {/* Delete Confirmation Modal */}
+      {showModal && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            paddingBottom:"430px",
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0,0,0,0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 9999,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "#fff",
+              padding: "25px",
+              borderRadius: "8px",
+              width: "350px",
+              textAlign: "center",
+              boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
+            }}
+          >
+            <h3 style={{fontSize:"18px", color:"black", marginBottom:"10px"}}>Confirm Delete</h3>
+            <p style={{color:"gray", fontSize:"15px"}}>
+              Are you sure you want to delete {memberToDelete?.name} record?
+            </p>
+            <div
+              style={{
+                marginTop: "15px",
+                marginLeft:"40px",
+                display: "flex",
+                gap:"20px"
+              }}
+            >
+              <button
+                style={{
+                  padding: "8px 16px",
+                  backgroundColor: "#fe786b",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize:"14px"
+                }}
+                onClick={handleDeleteMember}
+              >
+                Yes, Delete
+              </button>
+              <button
+                style={{
+                  padding: "8px 16px",
+                  backgroundColor: "#ccc",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize:"14px",
+                }}
+                onClick={() => setShowModal(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
