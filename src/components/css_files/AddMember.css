@@ -1,7 +1,7 @@
 .new-member-container {
     margin: 0;
     padding: 0;
-    max-width: 180%;
+    width: 700px;
     font-family: 'Arial', sans-serif;
     background-color: #eee9ff;
     color: #5E5E5E;
@@ -46,6 +46,7 @@ header {
     padding: 25px;
     font-weight: bold;
     color: #53687e;
+    
 }
 
 .new-member-form-container {

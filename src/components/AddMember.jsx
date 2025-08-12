@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./css_files/AddMember.css";
-import { toast } from "react-toastify";
+import {ToastContainer, toast } from "react-toastify";
 import medlife from "../assets/v987-18a-removebg-preview.png";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -8,21 +8,21 @@ const AddMember = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [formData, setFormData] = useState({
-    firstName: "John",
-    lastName: "Smith",
-    dob: "2025-08-13",
-    race: "Asian Indian",
-    gender: "Male",
-    height: "5.10ft",
-    weight: "200lbs",
-    a1c: "10.5",
-    bloodPressure: "150/90",
-    bmi: "29",
-    prescription:
-      "Metformin, Januvia, Acebutolol, Betaxolol, Aspirin, Etizolam, Elavil",
-  });
+  const initialFormData = {
+    firstName: "",
+    lastName: "",
+    dob: "",
+    race: "",
+    gender: "",
+    height: "",
+    weight: "",
+    a1c: "",
+    bloodPressure: "",
+    bmi: "",
+    prescription: "",
+  };
 
+  const [formData, setFormData] = useState(initialFormData);
   const [isEditMode, setIsEditMode] = useState(false);
 
   useEffect(() => {
@@ -40,8 +40,12 @@ const AddMember = () => {
     }));
   };
 
+  const validateForm = () => {
+    return Object.values(formData).every((val) => val && val.trim() !== "");
+  };
+
   const addMember = async () => {
-    const email = localStorage.getItem("userEmail") || "demo@medlife.com"; // Fallback email
+    const email = localStorage.getItem("userEmail") || "demo@medlife.com";
 
     const memberData = {
       email: email,
@@ -70,12 +74,12 @@ const AddMember = () => {
 
       if (!response.ok) {
         console.error("❌ Server Response:", data);
-        toast.error(data.detail || "Failed to edit member");
+        toast.error(data.detail || "Failed to add member");
         return;
       }
 
-       toast.success("Member Added successfully!");
-      navigate("/dashboard"); // ✅ Redirect after success
+      toast.success("Member Added successfully!");
+      navigate("/dashboard");
     } catch (error) {
       toast.error("Server error: " + error.message);
     }
@@ -118,11 +122,11 @@ const AddMember = () => {
 
       if (!response.ok) {
         console.error("❌ Server Response:", data);
-        toast.error(data.detail || "Failed to add member");
+        toast.error(data.detail || "Failed to edit member");
         return;
       }
 
-      toast.success("✅ Member added successfully!");
+      toast.success("✅ Member updated successfully!");
       navigate("/dashboard");
     } catch (error) {
       toast.error("Server error: " + error.message);
@@ -130,6 +134,10 @@ const AddMember = () => {
   };
 
   const handleSubmit = () => {
+    if (!validateForm()) {
+      toast.error("Please add all the fields");
+      return;
+    }
     if (isEditMode) {
       editMember();
     } else {
@@ -139,6 +147,17 @@ const AddMember = () => {
 
   return (
     <div className="new-member-container">
+    <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
       <header>
         <div className="header-left">
           <img src={medlife} alt="MedLife AI Logo" className="logo" />
@@ -154,8 +173,7 @@ const AddMember = () => {
       </header>
 
       <main className="new-member-main">
-        Begin by editing the sample patient information below and then press
-        CONFIRM at the bottom of the screen
+        Begin by filling all the fields below and then press CONFIRM
       </main>
 
       <div className="new-member-form-container">
@@ -166,6 +184,7 @@ const AddMember = () => {
             type="text"
             id="firstName"
             className="new-member-input"
+            placeholder={formData.firstName || "John"}
             value={formData.firstName}
             onChange={handleChange}
           />
@@ -175,6 +194,7 @@ const AddMember = () => {
             type="text"
             id="lastName"
             className="new-member-input"
+            placeholder={formData.lastName || "Smith"}
             value={formData.lastName}
             onChange={handleChange}
           />
@@ -184,24 +204,27 @@ const AddMember = () => {
             type="date"
             id="dob"
             className="new-member-input"
+            placeholder={formData.dob || "Y2025-08-13"}
             value={formData.dob}
             onChange={handleChange}
           />
 
-          <label className="new-member-label">Race</label>
+          <label className="new-member-label">Race *</label>
           <input
             type="text"
             id="race"
             className="new-member-input"
+            placeholder={formData.race || "Asian Indian"}
             value={formData.race}
             onChange={handleChange}
           />
 
-          <label className="new-member-label">Gender</label>
+          <label className="new-member-label">Gender *</label>
           <input
             type="text"
             id="gender"
             className="new-member-input"
+            placeholder={formData.gender || "Male"}
             value={formData.gender}
             onChange={handleChange}
           />
@@ -214,6 +237,7 @@ const AddMember = () => {
             type="text"
             id="height"
             className="new-member-input"
+            placeholder={formData.height || "5.10ft"}
             value={formData.height}
             onChange={handleChange}
           />
@@ -223,33 +247,37 @@ const AddMember = () => {
             type="text"
             id="weight"
             className="new-member-input"
+            placeholder={formData.weight || "200lbs"}
             value={formData.weight}
             onChange={handleChange}
           />
 
-          <label className="new-member-label">A1C</label>
+          <label className="new-member-label">A1C *</label>
           <input
             type="text"
             id="a1c"
             className="new-member-input"
+            placeholder={formData.a1c || "10.5"}
             value={formData.a1c}
             onChange={handleChange}
           />
 
-          <label className="new-member-label">Blood Pressure</label>
+          <label className="new-member-label">Blood Pressure *</label>
           <input
             type="text"
             id="bloodPressure"
             className="new-member-input"
+            placeholder={formData.bloodPressure || "150/90"}
             value={formData.bloodPressure}
             onChange={handleChange}
           />
 
-          <label className="new-member-label">BMI</label>
+          <label className="new-member-label">BMI *</label>
           <input
             type="text"
             id="bmi"
             className="new-member-input"
+            placeholder={formData.bmi || "29"}
             value={formData.bmi}
             onChange={handleChange}
           />
@@ -261,6 +289,7 @@ const AddMember = () => {
         <textarea
           id="prescription"
           className="new-member-textarea"
+          placeholder={formData.prescription || "Metformin, Januvia, Acebutolol, Betaxolol, Aspirin, Etizolam, Elavil"}
           value={formData.prescription}
           onChange={handleChange}
         />
@@ -289,4 +318,3 @@ const AddMember = () => {
 };
 
 export default AddMember;
-

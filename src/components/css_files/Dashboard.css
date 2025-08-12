@@ -154,6 +154,7 @@ header,
   padding: 12px 24px;
   border: 2px solid #ddd;
   text-align: center;
+  vertical-align: middle;
 }
 
 .members-table tr:hover {
@@ -180,6 +181,8 @@ header,
   font-weight: bold;
   cursor: pointer;
   align-items: center;
+  display: flex;
+  justify-content: center; 
 }
 
 .add-member-btn {
