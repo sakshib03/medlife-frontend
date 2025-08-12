@@ -221,7 +221,7 @@ const SignUp = () => {
               </button>
             </div>
 
-            <a style={{ color: "blue" }} className="forgot">Forgot password</a>
+            {/* <a style={{ color: "blue" }} className="forgot">Forgot password</a> */}
             <button type="submit" className="sign-in-btn">
               Sign Up
             </button>

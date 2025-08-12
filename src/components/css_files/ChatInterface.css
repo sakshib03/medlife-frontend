@@ -87,7 +87,7 @@ header {
 .sidebar h3{
   padding-top: 20px;
   padding-left: 12px;
-  color: #fe786b;
+  color: black;
 }
 
 .sidebar ul {
@@ -96,7 +96,7 @@ header {
 }
 
 .sidebar ul li {
-  padding: 10px 20px;
+  padding: 6px 20px;
   cursor: pointer;
   font-size: 14px;
   color: #6e6b6b;
@@ -206,6 +206,7 @@ header {
 /* Input area */
 .input-area {
   display: flex;
+ margin-left: 120px;
   width: 80%;
   gap: 4px;
   padding: 10px;

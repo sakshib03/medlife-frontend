@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import ReactDOM from "react-dom";
 import "./css_files/ChatInterface.css";
 
 import cloudIcon from "../assets/images/cloud.jpg";
@@ -10,18 +11,35 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import { useNavigate, useLocation } from "react-router-dom";
-import { Send, Download, Home, Edit } from "lucide-react";
+import {
+  Send,
+  Download,
+  Home,
+  Edit,
+  Trash2,
+  ChevronDown,
+  Pencil,
+  Check,
+  X,
+  Plus,
+} from "lucide-react";
 
 const PROVIDERS = ["openai", "gemini", "claude", "mistral"];
 const properName = (p) => p.charAt(0).toUpperCase() + p.slice(1);
+const API_BASE = "http://localhost:8000/medlife";
+
+// Prefer stable ids from server; fallback to UUID / timestamp
+const makeId = () =>
+  window.crypto?.randomUUID?.() ||
+  `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
 const ChatInterface = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
   // ===== User context =====
-  const [email] = useState(localStorage.getItem("userEmail") || ""); // stable per session
-  const keyFor = (k) => `${k}_${email}`; // per-user key helper
+  const [email] = useState(localStorage.getItem("userEmail") || "");
+  const keyFor = (k) => `${k}_${email}`;
 
   // ===== Chat state =====
   const [userInput, setUserInput] = useState("");
@@ -29,30 +47,41 @@ const ChatInterface = () => {
   const chatMessagesRef = useRef(null);
   const [selectedMember, setSelectedMember] = useState(null);
 
+  // Load all chat history for all members
+
+  // ===== Chat history =====
+  const [chatHistory, setChatHistory] = useState([]);
+  const [selectedChatId, setSelectedChatId] = useState(null);
+  const [isRenamingChatId, setIsRenamingChatId] = useState(null);
+  const [renameInput, setRenameInput] = useState("");
+  const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0 });
+  const chatsListRef = useRef(null);
+  const [showScrollDown, setShowScrollDown] = useState(false);
+
   const [data, setData] = useState([]);
-  // ===== UI state =====
+
+  // ===== UI =====
   const [isSettings, setIsSettings] = useState(false);
   const [showApiKeyPopup, setShowApiKeyPopup] = useState(false);
   const [popupClosedWithoutKey, setPopupClosedWithoutKey] = useState(false);
   const loadingMessageId = "loading-message";
 
-  // ===== Keys per provider (per user) =====
+  // ===== Provider keys =====
   const initialKeys = useMemo(() => {
     const obj = {};
     PROVIDERS.forEach((p) => {
       obj[p] = localStorage.getItem(keyFor(`api_key_${p}`)) || "";
     });
     return obj;
-  }, []); // email is captured above; this runs once per mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [apiKeys, setApiKeys] = useState(initialKeys);
 
-  // Providers available based on stored keys
   const availableProviders = useMemo(
     () => PROVIDERS.filter((p) => (apiKeys[p] || "").trim() !== ""),
     [apiKeys]
   );
 
-  // Restore previously selected provider (per user) if still valid
   const initialSelected = useMemo(() => {
     const stored = localStorage.getItem(keyFor("selectedAPI")) || "";
     if (
@@ -65,7 +94,8 @@ const ChatInterface = () => {
       (p) => (localStorage.getItem(keyFor(`api_key_${p}`)) || "").trim() !== ""
     );
     return first || "";
-  }, []); // per mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [selectedAPI, setSelectedAPI] = useState(initialSelected);
 
   // ===== Effects =====
@@ -75,6 +105,7 @@ const ChatInterface = () => {
     }
   }, [messages]);
 
+  // Member from route/storage
   useEffect(() => {
     if (location.state?.member) {
       setSelectedMember(location.state.member);
@@ -86,23 +117,21 @@ const ChatInterface = () => {
       const storedMember = localStorage.getItem(keyFor("currentMember"));
       if (storedMember) setSelectedMember(JSON.parse(storedMember));
     }
-  }, [location]); // eslint wants location
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location]);
 
-  // Show the API-key popup only once for a new user (until they save at least one key).
+  // API key popup once
   useEffect(() => {
     const hasShown =
       localStorage.getItem(keyFor("hasShownApiKeyPopup")) === "true";
     const anyKey = PROVIDERS.some(
       (p) => (localStorage.getItem(keyFor(`api_key_${p}`)) || "").trim() !== ""
     );
-    if (!anyKey && !hasShown) {
-      setShowApiKeyPopup(true);
-    } else {
-      setShowApiKeyPopup(false);
-    }
-  }, []); // run once on mount
+    setShowApiKeyPopup(!anyKey && !hasShown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // Keep per-user selected provider persisted and valid
+  // Persist selected provider
   useEffect(() => {
     const valid = selectedAPI && (apiKeys[selectedAPI] || "").trim() !== "";
     if (valid) {
@@ -115,7 +144,188 @@ const ChatInterface = () => {
       setSelectedAPI("");
       localStorage.removeItem(keyFor("selectedAPI"));
     }
-  }, [selectedAPI, apiKeys, availableProviders]); // keep in sync
+  }, [selectedAPI, apiKeys, availableProviders]);
+
+  // --- Load chats (server first, then local fallback) ---
+  // --- Load chats (server first, then local fallback) ---
+  // On user switch, always start with a fresh empty chat selected (like ChatGPT).
+  useEffect(() => {
+    if (!email) return;
+
+    // Detect user switch
+    const last = localStorage.getItem("lastEmailUsed");
+    const isSwitch = last !== email;
+    localStorage.setItem("lastEmailUsed", email);
+
+    const addFreshAndSelect = async (list) => {
+      const freshId = makeId();
+      const fresh = {
+        id: freshId,
+        name: `Chat ${list.length + 1}`,
+        messages: [],
+      };
+      const next = [fresh, ...list];
+      setChatHistory(next);
+      localStorage.setItem(keyFor("chatHistory"), JSON.stringify(next));
+      setSelectedChatId(freshId);
+      setMessages([]);
+      // best-effort remote sync
+      try {
+        await fetch(`${API_BASE}/chats?email=${encodeURIComponent(email)}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ chats: next }),
+        });
+      } catch {}
+    };
+
+    const loadLocal = async () => {
+      const stored = localStorage.getItem(keyFor("chatHistory"));
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (isSwitch) {
+            await addFreshAndSelect(Array.isArray(parsed) ? parsed : []);
+          } else {
+            setChatHistory(parsed);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setSelectedChatId(parsed[0].id);
+              setMessages(parsed[0].messages || []);
+            } else {
+              // No chats yet → start fresh
+              await addFreshAndSelect([]);
+            }
+          }
+          return;
+        } catch {
+          // fall through to fresh
+        }
+      }
+      // No local or parse fail → start fresh list
+      addFreshAndSelect([]);
+    };
+
+    const loadRemote = async () => {
+      try {
+        const res = await fetch(
+          `${API_BASE}/chats?email=${encodeURIComponent(email)}`
+        );
+        if (!res.ok) throw new Error("No remote chats");
+        const data = await res.json();
+        const remoteChats = Array.isArray(data?.chats) ? data.chats : [];
+        const normalized = remoteChats.map((c, idx) => ({
+          id: c.id || makeId(),
+          name: c.name || `Chat ${idx + 1}`,
+          messages: Array.isArray(c.messages) ? c.messages : [],
+        }));
+
+        if (isSwitch) {
+          await addFreshAndSelect(normalized);
+        } else {
+          setChatHistory(normalized);
+          localStorage.setItem(
+            keyFor("chatHistory"),
+            JSON.stringify(normalized)
+          );
+          if (normalized.length > 0) {
+            setSelectedChatId(normalized[0].id);
+            setMessages(normalized[0].messages || []);
+          } else {
+            await addFreshAndSelect([]);
+          }
+        }
+      } catch {
+        // fallback to local cache on error
+        await loadLocal();
+      }
+    };
+
+    loadRemote();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [email]);
+
+  // --- Persist chats (local + remote) helper ---
+  const persistChats = async (next) => {
+    setChatHistory(next);
+    localStorage.setItem(keyFor("chatHistory"), JSON.stringify(next));
+    try {
+      await fetch(`${API_BASE}/chats?email=${encodeURIComponent(email)}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chats: next }),
+      });
+    } catch {
+      // silent fail → local cache still good
+    }
+  };
+
+  // Keep selected chat messages synced in chatHistory + persist
+  useEffect(() => {
+    if (!email || !selectedChatId) return;
+    setChatHistory((prev) => {
+      const updated = prev.map((c) =>
+        c.id === selectedChatId ? { ...c, messages: [...messages] } : c
+      );
+      localStorage.setItem(keyFor("chatHistory"), JSON.stringify(updated));
+      // fire-and-forget remote sync
+      (async () => {
+        try {
+          await fetch(`${API_BASE}/chats?email=${encodeURIComponent(email)}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ chats: updated }),
+          });
+        } catch {}
+      })();
+      return updated;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages, selectedChatId]);
+
+  // Scroll button when > ~2 chats
+  useEffect(() => {
+    const el = chatsListRef.current;
+    if (!el) return;
+    const update = () =>
+      setShowScrollDown(el.scrollHeight > el.clientHeight + 4);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [chatHistory.length]);
+
+  // Load members
+  useEffect(() => {
+    const em = localStorage.getItem("userEmail");
+    if (!em) return;
+
+    fetch(`${API_BASE}/getmember?email=${encodeURIComponent(em)}`)
+      .then((res) => res.json())
+      .then((result) => {
+        if (result?.members) {
+          const members = result.members
+            .map((member, index) => ({
+              name: `${member.firstName} ${member.lastName}`.trim(),
+              memberIndex: index + 1,
+              ...member,
+            }))
+            .filter((m) => m.firstName);
+          setData(members);
+          localStorage.setItem(keyFor("membersList"), JSON.stringify(members));
+        }
+      })
+      .catch(() => {
+        const cached = localStorage.getItem(keyFor("membersList"));
+        if (cached) {
+          try {
+            setData(JSON.parse(cached));
+          } catch {
+            setData([]);
+          }
+        }
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ===== Helpers =====
   const appendMessage = (sender, name, text) => {
@@ -124,13 +334,159 @@ const ChatInterface = () => {
       {
         sender,
         name,
-        text: text.replace(/\\n/g, "\n").replace(/\n/g, "<br>"),
-        id: Date.now(),
+        text: String(text).replace(/\\n/g, "\n").replace(/\n/g, "<br>"),
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       },
     ]);
   };
 
+  const stripHtml = (s) =>
+    String(s || "")
+      .replace(/<br\s*\/?>/gi, " ")
+      .replace(/<[^>]*>/g, "")
+      .trim();
+
+  const deriveChatName = (msgs, fallbackIndex) => {
+    const firstUser = msgs.find((m) => m.sender === "user");
+    const base = stripHtml(firstUser?.text || msgs[0]?.text || "");
+    const title = base.length ? base.slice(0, 40) : `Chat ${fallbackIndex}`;
+    return title;
+  };
+
+  // If a chat starts empty and the first user message arrives, auto-title it
+  useEffect(() => {
+    if (!selectedChatId || messages.length === 0) return;
+    setChatHistory((prev) => {
+      const idx = prev.findIndex((c) => c.id === selectedChatId);
+      if (idx === -1) return prev;
+      const chat = prev[idx];
+      const defaultLike = /^Chat\s+\d+$/i.test(chat.name || "");
+      if (!defaultLike) return prev;
+      const titled = {
+        ...chat,
+        name: deriveChatName(messages, idx + 1),
+      };
+      const next = [...prev];
+      next[idx] = titled;
+      // persist
+      persistChats(next);
+      return next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages]);
+
   // ===== Actions =====
+  const handleNewChat = async () => {
+    // Save current chat before creating new one
+    if (selectedMember && messages.length > 0) {
+      await handleSaveChat();
+    }
+
+    let next = [...chatHistory];
+
+    // Archive current thread (if any), auto-title if still default
+    if (messages.length > 0) {
+      if (selectedChatId) {
+        next = next.map((c, idx) => {
+          if (c.id !== selectedChatId) return c;
+          const defaultLike = /^Chat\s+\d+$/i.test(c.name || "");
+          return {
+            ...c,
+            name: defaultLike ? deriveChatName(messages, idx + 1) : c.name,
+            messages: [...messages],
+          };
+        });
+      } else {
+        const archivedId = makeId();
+        const name = deriveChatName(messages, next.length + 1);
+        next = [{ id: archivedId, name, messages: [...messages] }, ...next];
+      }
+    }
+
+    // Create a fresh empty chat at top
+    const freshId = makeId();
+    const fresh = {
+      id: freshId,
+      name: `Chat ${next.length + 1}`,
+      messages: [],
+    };
+    next = [fresh, ...next];
+
+    setSelectedChatId(freshId);
+    setMessages([]);
+    setUserInput("");
+
+    // Create new history page for the current member
+    if (selectedMember) {
+      const historyKey = `${email}_${selectedMember.firstName}_${selectedMember.lastName}`;
+      const newHistory = {
+        id: freshId,
+        name: `Chat ${next.length}`,
+        messages: [],
+        member: selectedMember,
+        createdAt: new Date().toISOString(),
+      };
+
+      localStorage.setItem(
+        `history_${historyKey}_${freshId}`,
+        JSON.stringify(newHistory)
+      );
+    }
+
+    persistChats(next);
+    setIsRenamingChatId(null);
+    setRenameInput("");
+  };
+
+  const handleRenameChat = (chatId, newName) => {
+    const name = newName.trim();
+    if (!name) {
+      setIsRenamingChatId(null);
+      setRenameInput("");
+      return;
+    }
+    const next = chatHistory.map((c) => (c.id === chatId ? { ...c, name } : c));
+    setIsRenamingChatId(null);
+    setRenameInput("");
+    persistChats(next);
+  };
+
+  const handleDeleteChat = async (chatId) => {
+    const next = chatHistory.filter((c) => c.id !== chatId);
+    // try server delete (optional)
+    try {
+      await fetch(
+        `${API_BASE}/chats/${encodeURIComponent(
+          chatId
+        )}?email=${encodeURIComponent(email)}`,
+        {
+          method: "DELETE",
+        }
+      );
+    } catch {}
+    persistChats(next);
+
+    if (selectedChatId === chatId) {
+      if (next.length > 0) {
+        setSelectedChatId(next[0].id);
+        setMessages(next[0].messages || []);
+      } else {
+        setSelectedChatId(null);
+        setMessages([]);
+      }
+    }
+  };
+
+  const handleSelectChat = (chatId) => {
+    const chat = chatHistory.find((c) => c.id === chatId);
+    if (!chat) return;
+    setSelectedChatId(chatId);
+    setMessages(chat.messages || []);
+    setUserInput("");
+    setIsRenamingChatId(null);
+    setRenameInput("");
+  };
+
   const handleSendMessage = async () => {
     const message = userInput.trim();
     if (!message || !selectedMember) return;
@@ -144,6 +500,19 @@ const ChatInterface = () => {
       }
       setShowApiKeyPopup(true);
       return;
+    }
+
+    // ensure there is a selected chat; if not, create one
+    if (!selectedChatId) {
+      const freshId = makeId();
+      const fresh = {
+        id: freshId,
+        name: `Chat ${chatHistory.length + 1}`,
+        messages: [],
+      };
+      const next = [fresh, ...chatHistory];
+      setSelectedChatId(freshId);
+      persistChats(next);
     }
 
     appendMessage("user", "You", message);
@@ -161,7 +530,7 @@ const ChatInterface = () => {
     try {
       const memberData = selectedMember ? JSON.stringify(selectedMember) : "";
       const res = await fetch(
-        `http://localhost:8000/medlife/ask_ai/?query=${encodeURIComponent(
+        `${API_BASE}/ask_ai/?query=${encodeURIComponent(
           message
         )}&api_key=${encodeURIComponent(
           apiKeys[selectedAPI]
@@ -176,14 +545,15 @@ const ChatInterface = () => {
         const errorData = await res.text();
         setMessages((prev) => prev.filter((m) => m.id !== loadingMessageId));
 
-        if (errorData.toLowerCase().includes("api key")) {
+        const lower = errorData.toLowerCase();
+        if (lower.includes("api key")) {
           appendMessage(
             "ai",
             "Medlife.ai",
             "Please provide a valid API key to continue."
           );
           setShowApiKeyPopup(true);
-        } else if (errorData.toLowerCase().includes("quota")) {
+        } else if (lower.includes("quota")) {
           appendMessage(
             "ai",
             "Medlife.ai",
@@ -198,6 +568,7 @@ const ChatInterface = () => {
       const aiResponse = await res.text();
       setMessages((prev) => prev.filter((m) => m.id !== loadingMessageId));
       appendMessage("ai", "Medlife.ai", aiResponse);
+      // messages effect will persist to history/remote
     } catch (err) {
       setMessages((prev) => prev.filter((m) => m.id !== loadingMessageId));
       appendMessage(
@@ -216,7 +587,7 @@ const ChatInterface = () => {
       return;
     }
     try {
-      const url = `http://localhost:8000/medlife/saveChat/?email=${encodeURIComponent(
+      const url = `${API_BASE}/saveChat/?email=${encodeURIComponent(
         email
       )}&member_name=${encodeURIComponent(
         `${selectedMember.firstName}_${selectedMember.lastName}`
@@ -257,9 +628,15 @@ const ChatInterface = () => {
         const formatted = messages.map((msg) => ({
           type: msg.sender,
           name: msg.name,
-          message: msg.text.replace(/<br>/g, "\n"),
+          message: String(msg.text || "").replace(/<br>/g, "\n"),
         }));
-        generatePDF(formatted, selectedMember.fullName);
+        const safeName =
+          selectedMember.fullName ||
+          `${selectedMember.firstName || ""} ${
+            selectedMember.lastName || ""
+          }` ||
+          "Member";
+        generatePDF(formatted, safeName);
       })
       .catch((err) => {
         console.error("Error loading PDF generator:", err);
@@ -269,12 +646,9 @@ const ChatInterface = () => {
       });
   };
 
-  // Keep keys + “shown” flag across sign-ins; only clear transient items.
   const handleLogout = () => {
-    // DO NOT remove per-user API keys or hasShown flag.
     localStorage.removeItem(keyFor("selectedAPI"));
     localStorage.removeItem(keyFor("currentMember"));
-    // (Optionally remove any auth/session tokens your app uses here.)
     navigate("/signin");
   };
 
@@ -284,17 +658,14 @@ const ChatInterface = () => {
     if (el) el.focus();
   };
 
-  // Save keys from settings & first-time popup; set “hasShown” flag true.
   const saveKeys = () => {
     const newKeys = { ...apiKeys };
     PROVIDERS.forEach((p) => {
       localStorage.setItem(keyFor(`api_key_${p}`), newKeys[p] || "");
     });
 
-    // Mark that this user has completed the popup.
     localStorage.setItem(keyFor("hasShownApiKeyPopup"), "true");
 
-    // Ensure a valid selected provider is set.
     const valid = selectedAPI && (newKeys[selectedAPI] || "").trim() !== "";
     if (!valid) {
       const first = PROVIDERS.find((p) => (newKeys[p] || "").trim() !== "");
@@ -319,31 +690,6 @@ const ChatInterface = () => {
     setIsSettings(false);
     setShowApiKeyPopup(false);
   };
-
-  useEffect(() => {
-    const email = localStorage.getItem("userEmail");
-    if (!email) return;
-
-    fetch(
-      `http://localhost:8000/medlife/getmember?email=${encodeURIComponent(
-        email
-      )}`
-    )
-      .then((res) => res.json())
-      .then((result) => {
-        if (result.members) {
-          const members = result.members
-            .map((member, index) => ({
-              name: `${member.firstName} ${member.lastName}`,
-              memberIndex: index + 1,
-              ...member,
-            }))
-            .filter((m) => m.firstName);
-          setData(members);
-        }
-      });
-  }, []);
-  
 
   // ===== Render =====
   return (
@@ -381,46 +727,7 @@ const ChatInterface = () => {
 
       <div className="chat-container">
         <div className="sidebar">
-          {/* Member selection dropdown */}
-          <div
-            style={{ marginTop: "60px", textAlign: "left", marginLeft: "10px" }}
-          >
-            <h2
-              style={{
-                marginBottom: 8,
-                textAlign: "left",
-                color: "#fe786b",
-                fontSize: 16,
-              }}
-            >
-              Please select member
-            </h2>
-            <select
-              value={selectedAPI}
-              onChange={(e) => setSelectedAPI(e.target.value)}
-              style={{
-                marginBottom: 2,
-                padding: "6px 8px",
-                borderRadius: 6,
-                border: "1px solid #ccc",
-                width: "70%",
-                color: "black",
-              }}
-            >
-              {data.length > 0 && <option value="">Select Member</option>}
-              {data.map((member) => (
-                <option
-                  key={member.memberIndex}
-                  value={member.memberIndex}
-                  style={{ backgroundColor: "#fe8f85;" }}
-                >
-                  {member.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
+          <div style={{ marginTop: "30px" }}>
             <h3>Recommended Health Questions</h3>
             <ul>
               <li
@@ -456,28 +763,160 @@ const ChatInterface = () => {
           </div>
 
           <div
-          className="upgrade"
-           style={{
+            // className="upgrade"
+            style={{
               display: "flex",
+              marginTop: "50px",
+              marginBottom: "10px",
+              marginLeft: "10px",
               alignItems: "Left",
               justifyContent: "Left",
               gap: "6px",
-            }}>
-            <Edit size={18}/> New Chat
+              cursor: "pointer",
+              color: "black",
+            }}
+            onClick={handleNewChat}
+            title="Start a new chat"
+          >
+            <div style={{ display: "flex", gap: "190px" }}>
+              <p> Recent Chats</p>
+              <span>
+                {" "}
+                <Plus
+                  size={18}
+                  marginLeft={4}
+                  marginTop={2}
+                  alignItems={"left"}
+                />
+              </span>
+            </div>
           </div>
 
           <div>
-            <h3>Chats</h3>
-           <ul>
-            <li> Is there any prescriptions I should be particularly concerned
-                about if added to my list?</li>
-            <li> Is there any prescriptions I should be particularly concerned
-                about if added to my list?</li>
-       
-           </ul>
+            <div
+              style={{
+                position: "relative",
+                maxHeight: "350px",
+                overflowY: isRenamingChatId ? "visible" : "auto",
+                paddingRight: "12px",
+              }}
+            >
+              <ul
+                ref={chatsListRef}
+                style={{
+                  maxHeight: "350px",
+                  overflowY: "auto",
+                  paddingLeft: 0,
+                  scrollBehavior: "smooth",
+                }}
+              >
+                {chatHistory.map((chat) => (
+                  <li
+                    key={chat.id}
+                    style={{
+                      listStyle: "none",
+                      padding: "6px 8px",
+                      backgroundColor:
+                        chat.id === selectedChatId ? "#fe786b" : "transparent",
+                      color: chat.id === selectedChatId ? "white" : "black",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      borderRadius: "4px",
+                      marginBottom: "4px",
+                      gap: 8,
+                    }}
+                  >
+                    <>
+                      {isRenamingChatId === chat.id ? (
+                        <input
+                          type="text"
+                          value={renameInput}
+                          onChange={(e) => setRenameInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              handleRenameChat(chat.id, renameInput);
+                            } else if (e.key === "Escape") {
+                              setIsRenamingChatId(null);
+                              setRenameInput("");
+                            }
+                          }}
+                          onBlur={() => {
+                            handleRenameChat(chat.id, renameInput);
+                          }}
+                          autoFocus
+                          style={{
+                            flexGrow: 1,
+                            padding: "4px 8px",
+                            borderRadius: 4,
+                            border: "1px solid #ccc",
+                            fontSize: 14,
+                            color: "black",
+                          }}
+                        />
+                      ) : (
+                        <span
+                          onClick={() => handleSelectChat(chat.id)}
+                          style={{
+                            flexGrow: 1,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {chat.name}
+                        </span>
+                      )}
+                    </>
+                    <div style={{ display: "flex", gap: 4 }}>
+                      <Pencil
+                        size={14}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsRenamingChatId(chat.id);
+                          setRenameInput(chat.name);
+                        }}
+                        style={{ cursor: "pointer", opacity: 0.7 }}
+                      />
+                      <Trash2
+                        size={14}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteChat(chat.id);
+                        }}
+                        style={{ cursor: "pointer", opacity: 0.7 }}
+                      />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+              {showScrollDown && (
+                <button
+                  onClick={() => {
+                    const el = chatsListRef.current;
+                    if (el) el.scrollTop = el.scrollHeight;
+                  }}
+                  title="Scroll to more chats"
+                  style={{
+                    position: "absolute",
+                    right: 4,
+                    bottom: 4,
+                    border: "none",
+                    background: "#fff",
+                    boxShadow: "0 1px 6px rgba(0,0,0,.15)",
+                    borderRadius: 6,
+                    padding: 4,
+                    cursor: "pointer",
+                  }}
+                >
+                  <ChevronDown size={16} />
+                </button>
+              )}
+            </div>
           </div>
 
-          <div
+          {/* <div
             className="upgrade"
             onClick={() => navigate("/dashboard")}
             style={{
@@ -485,11 +924,12 @@ const ChatInterface = () => {
               alignItems: "Left",
               justifyContent: "Left",
               gap: "6px",
+              cursor: "pointer",
             }}
           >
             <Home size={18} />
             Dashboard
-          </div>
+          </div> */}
         </div>
 
         <div className="main-content">
@@ -507,44 +947,108 @@ const ChatInterface = () => {
                 <p>Would like to talk about your Health?</p>
               </div>
 
-              <div style={{ alignSelf: "flex-end", minWidth: 100 }}>
-                <h2
-                  style={{
-                    marginBottom: 8,
-                    textAlign: "left",
-                    color: "#fe786b",
-                    fontSize: 16,
-                  }}
-                >
-                  Please select your AI provider
-                </h2>
-                <select
-                  value={selectedAPI}
-                  onChange={(e) => setSelectedAPI(e.target.value)}
-                  style={{
-                    marginBottom: 2,
-                    padding: "6px 8px",
-                    borderRadius: 6,
-                    border: "1px solid #ccc",
-                    width: "100%",
-                  }}
-                >
-                  {!availableProviders.length && (
-                    <option value="">No providers available</option>
-                  )}
-                  {availableProviders.length > 0 && (
-                    <option value="">Select AI Provider</option>
-                  )}
-                  {availableProviders.map((p) => (
-                    <option
-                      key={p}
-                      value={p}
-                      style={{ backgroundColor: "#fe8f85;" }}
-                    >
-                      {properName(p)}
-                    </option>
-                  ))}
-                </select>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  marginTop: "50px",
+                  marginLeft: "10px",
+                  marginRight: "20px",
+                  gap: "20px",
+                }}
+              >
+                {/* Member Selection */}
+                <div style={{ flex: 1 }}>
+                  <h2
+                    style={{
+                      marginBottom: 8,
+                      textAlign: "left",
+                      color: "#fe786b",
+                      fontSize: 16,
+                    }}
+                  >
+                    Select member
+                  </h2>
+                  <select
+                    value={selectedMember ? selectedMember.memberIndex : ""}
+                    onChange={(e) => {
+                      const selectedIndex = parseInt(e.target.value, 10);
+                      const member =
+                        data.find((m) => m.memberIndex === selectedIndex) ||
+                        null;
+                      setSelectedMember(member);
+                      if (member) {
+                        localStorage.setItem(
+                          keyFor("currentMember"),
+                          JSON.stringify(member)
+                        );
+                      } else {
+                        localStorage.removeItem(keyFor("currentMember"));
+                      }
+                    }}
+                    style={{
+                      marginBottom: 2,
+                      padding: "6px 8px",
+                      borderRadius: 6,
+                      border: "1px solid #ccc",
+                      width: "100%",
+                      color: "black",
+                    }}
+                  >
+                    <option value="">Select Member</option>
+                    {data.map((member) => (
+                      <option
+                        key={member.memberIndex}
+                        value={member.memberIndex}
+                        style={{ backgroundColor: "#fe8f85" }}
+                      >
+                        {member.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* AI Provider Selection */}
+                <div style={{ flex: 1 }}>
+                  <h2
+                    style={{
+                      marginBottom: 8,
+                      textAlign: "left",
+                      color: "#fe786b",
+                      fontSize: 16,
+                    }}
+                  >
+                    AI Engine
+                  </h2>
+                  <select
+                    value={selectedAPI}
+                    onChange={(e) => setSelectedAPI(e.target.value)}
+                    style={{
+                      marginBottom: 2,
+                      padding: "6px 8px",
+                      borderRadius: 6,
+                      border: "1px solid #ccc",
+                      width: "100%",
+                    }}
+                  >
+                    {!availableProviders.length && (
+                      <option value="">No providers available</option>
+                    )}
+                    {availableProviders.length > 0 && (
+                      <option value="">Select AI Provider</option>
+                    )}
+                    {availableProviders.map((p) => (
+                      <option
+                        key={p}
+                        value={p}
+                        style={{ backgroundColor: "#fe8f85" }}
+                      >
+                        {properName(p)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
 
@@ -582,9 +1086,9 @@ const ChatInterface = () => {
               >
                 <Send size={20} />
               </button>
-              <button onClick={handleSaveChat}>
+              {/* <button onClick={handleSaveChat}>
                 <img src={cloudIcon} alt="Save" />
-              </button>
+              </button> */}
               <button onClick={handleDownloadChat}>
                 <Download size={20} />
               </button>
@@ -600,7 +1104,7 @@ const ChatInterface = () => {
         </div>
       </div>
 
-      {/* Settings modal: enter & save keys only */}
+      {/* Settings modal */}
       {isSettings && (
         <div className="modal-overlay">
           <div className="modal-content api-key-modal">
@@ -616,9 +1120,9 @@ const ChatInterface = () => {
 
             <h2
               style={{
-                marginTop: "0",
-                marginBottom: "14px",
-                fontSize: "20px",
+                marginTop: 0,
+                marginBottom: 14,
+                fontSize: 20,
                 color: "#fe786b",
               }}
             >
@@ -629,7 +1133,6 @@ const ChatInterface = () => {
               {PROVIDERS.map((provider) => {
                 const hasKey = (apiKeys[provider] || "").trim() !== "";
 
-                // Masking function: show only first 3 & last 3 chars
                 const maskApiKey = (key) => {
                   if (!key) return "";
                   if (key.length <= 6) return key;
@@ -646,7 +1149,7 @@ const ChatInterface = () => {
                       marginBottom: 14,
                       border: hasKey ? "2px solid #4CAF50" : "1px solid #ccc",
                       borderRadius: 6,
-                      padding: "8px",
+                      padding: 8,
                       position: "relative",
                     }}
                   >
@@ -670,16 +1173,11 @@ const ChatInterface = () => {
                           : apiKeys[provider]
                       }
                       onFocus={(e) => {
-                        // Show full key when input is focused
-                        if (hasKey) {
-                          e.target.value = apiKeys[provider];
-                        }
+                        if (hasKey) e.target.value = apiKeys[provider];
                       }}
                       onBlur={(e) => {
-                        // Re-mask when input loses focus
-                        if (hasKey) {
+                        if (hasKey)
                           e.target.value = maskApiKey(apiKeys[provider]);
-                        }
                       }}
                       onChange={(e) =>
                         setApiKeys({ ...apiKeys, [provider]: e.target.value })
@@ -760,7 +1258,7 @@ const ChatInterface = () => {
         </div>
       )}
 
-      {/* First-time key prompt (only once per user) */}
+      {/* First-time key prompt */}
       {showApiKeyPopup && (
         <div className="modal-overlay">
           <div className="modal-content api-key-modal">
@@ -774,13 +1272,7 @@ const ChatInterface = () => {
               ✖
             </button>
 
-            <h2
-              style={{
-                marginBottom: "10px",
-                color: "#fe8f85",
-                fontSize: "20px",
-              }}
-            >
+            <h2 style={{ marginBottom: 10, color: "#fe8f85", fontSize: 20 }}>
               Enter Your AI API Keys
             </h2>
 

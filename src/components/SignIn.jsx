@@ -17,30 +17,29 @@ const SignIn = () => {
     setShowPassword(!showPassword);
   };
 
-
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     try {
-      const response = await fetch('http://localhost:8000/signin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ login: username, password })
+      const response = await fetch("http://localhost:8000/signin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ login: username, password }),
       });
       const data = await response.json();
-        if (response.ok) {
+      if (response.ok) {
         // Store access token in localStorage
         localStorage.setItem("accessToken", data.access_token);
         localStorage.setItem("userEmail", data.email);
 
-        toast.success('Login successful!', {
+        toast.success("Login successful!", {
           position: "top-right",
           autoClose: 2000,
           hideProgressBar: false,
           closeOnClick: true,
           draggable: true,
           progress: undefined,
-onClose: () => {
+          onClose: () => {
             navigate("/disclaimer"); // Redirect to disclaimer page after login
           },
         });
@@ -112,7 +111,7 @@ onClose: () => {
               required
             />
 
-            <div style={{ position: "relative" }}>
+            <div style={{ position: "relative", marginBottom: "20px" }}>
               <label
                 htmlFor="password"
                 style={{ color: "gray", fontSize: "14px" }}
@@ -143,18 +142,24 @@ onClose: () => {
                 {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
               </button>
             </div>
-
-<button type="button" style={{ color: "blue", background: "none", border: "none", padding: 0, textDecoration: "underline", cursor: "pointer" }} className="forgot">Forgot password</button>
+            {/* 
+<button type="button" style={{ color: "blue", background: "none", border: "none", padding: 0, textDecoration: "underline", cursor: "pointer" }} className="forgot">Forgot password</button> */}
             <button type="submit" className="sign-in-btn">
               Sign In
             </button>
 
-
-            <p style={{ color: "gray" }}>
+            <p style={{ color: "gray", marginTop: "4px" }}>
               Don't have an account?{" "}
-<button
+              <button
                 type="button"
-                style={{ color: "blue", background: "none", border: "none", padding: 0, textDecoration: "underline", cursor: "pointer" }}
+                style={{
+                  color: "blue",
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  textDecoration: "underline",
+                  cursor: "pointer",
+                }}
                 className="sign-up"
                 onClick={() => {
                   navigate("/signup");
@@ -163,7 +168,6 @@ onClose: () => {
                 Sign Up
               </button>
             </p>
-
           </form>
         </div>
 
@@ -173,6 +177,6 @@ onClose: () => {
       </div>
     </div>
   );
-  };
+};
 
 export default SignIn;
