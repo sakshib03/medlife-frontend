@@ -10,7 +10,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import { useNavigate, useLocation } from "react-router-dom";
-import { Send, Download, Home } from "lucide-react";
+import { Send, Download, Home, Edit } from "lucide-react";
 
 const PROVIDERS = ["openai", "gemini", "claude", "mistral"];
 const properName = (p) => p.charAt(0).toUpperCase() + p.slice(1);
@@ -343,6 +343,7 @@ const ChatInterface = () => {
         }
       });
   }, []);
+  
 
   // ===== Render =====
   return (
@@ -455,26 +456,25 @@ const ChatInterface = () => {
           </div>
 
           <div
+          className="upgrade"
            style={{
               display: "flex",
-              alignItems: "center",
-              MarginLeft: "60px",
-              justifyContent: "center",
+              alignItems: "Left",
+              justifyContent: "Left",
               gap: "6px",
-              backgroundColor:"#fe786b",
-              width:"200px"
             }}>
-            <button>+</button>
-
+            <Edit size={18}/> New Chat
           </div>
 
           <div>
             <h3>Chats</h3>
-            <ul>
-              <li>Chat 1</li>
-              <li>Chat 2</li>
-              <li>Chat 3</li>
-            </ul>
+           <ul>
+            <li> Is there any prescriptions I should be particularly concerned
+                about if added to my list?</li>
+            <li> Is there any prescriptions I should be particularly concerned
+                about if added to my list?</li>
+       
+           </ul>
           </div>
 
           <div
@@ -482,8 +482,8 @@ const ChatInterface = () => {
             onClick={() => navigate("/dashboard")}
             style={{
               display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              alignItems: "Left",
+              justifyContent: "Left",
               gap: "6px",
             }}
           >
