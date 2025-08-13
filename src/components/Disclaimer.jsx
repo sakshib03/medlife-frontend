@@ -2,6 +2,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./css_files/Disclaimer.css";
+import Cookies from "js-cookie";
 
 const Disclaimer = () => {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ const Disclaimer = () => {
   };
 
   const handleCancel = () => {
-    localStorage.removeItem("userEmail");
+    Cookies.remove("userEmail");
     localStorage.removeItem("showDisclaimer");
     navigate("/");
   };

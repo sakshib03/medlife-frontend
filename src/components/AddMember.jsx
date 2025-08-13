@@ -3,6 +3,7 @@ import "./css_files/AddMember.css";
 import {ToastContainer, toast } from "react-toastify";
 import medlife from "../assets/v987-18a-removebg-preview.png";
 import { useNavigate, useLocation } from "react-router-dom";
+import Cookies from "js-cookie";
 
 const AddMember = () => {
   const navigate = useNavigate();
@@ -45,7 +46,7 @@ const AddMember = () => {
   };
 
   const addMember = async () => {
-    const email = localStorage.getItem("userEmail") || "demo@medlife.com";
+    const email = Cookies.get("userEmail");
 
     const memberData = {
       email: email,
@@ -86,7 +87,7 @@ const AddMember = () => {
   };
 
   const editMember = async () => {
-    const email = localStorage.getItem("userEmail") || "demo@medlife.com";
+    const email = Cookies.get("userEmail");
 
     const memberData = {
       firstName: formData.firstName.trim(),

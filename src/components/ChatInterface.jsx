@@ -9,6 +9,7 @@ import settings from "../assets/images/Depth 4, Frame 1.png";
 import medlife from "../assets/v987-18a-removebg-preview.png";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Cookies from "js-cookie";
 
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -38,7 +39,7 @@ const ChatInterface = () => {
   const location = useLocation();
 
   // ===== User context =====
-  const [email] = useState(localStorage.getItem("userEmail") || "");
+  const [email] = useState(Cookies.get("userEmail"));
   const keyFor = (k) => `${k}_${email}`;
 
   // ===== Chat state =====
@@ -296,7 +297,7 @@ const ChatInterface = () => {
 
   // Load members
   useEffect(() => {
-    const em = localStorage.getItem("userEmail");
+    const em = Cookies.get("userEmail");
     if (!em) return;
 
     fetch(`${API_BASE}getmember?email=${encodeURIComponent(em)}`)

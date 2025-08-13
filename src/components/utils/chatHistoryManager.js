@@ -1,7 +1,8 @@
 // Chat History Manager for handling multiple history pages
+import Cookies from "js-cookie";
 class ChatHistoryManager {
   constructor() {
-    this.currentUser = localStorage.getItem("userEmail") || "";
+    this.currentUser =Cookies.get("userEmail");
     this.currentMember = null;
     this.historyPages = new Map();
   }

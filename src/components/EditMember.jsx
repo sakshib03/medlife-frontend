@@ -4,6 +4,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "./css_files/AddMember.css";
 import medlife from "../assets/v987-18a-removebg-preview.png";
 import { useLocation, useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
 
 const EditMember = () => {
   const location = useLocation();
@@ -54,7 +55,7 @@ const EditMember = () => {
   };
 
   const editMember = async () => {
-    const email = localStorage.getItem("userEmail") || "demo@medlife.com";
+    const email = Cookies.get("userEmail");
 
     const memberData = {
       firstName: formData.firstName.trim(),

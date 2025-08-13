@@ -21,7 +21,7 @@ const Dashboard = () => {
 
   // Fetch members on component mount
   useEffect(() => {
-    const email = localStorage.getItem("userEmail") || "";
+    const email = Cookies.get("userEmail");
     setUserEmail(email);
 
     if (email) {
@@ -90,7 +90,7 @@ const Dashboard = () => {
   };
 
   const handleStartChat = async (member) => {
-    const email = localStorage.getItem("userEmail");
+    const email =Cookies.get("userEmail");
     if (!email) {
       toast.error("User not logged in", { autoClose: 2000 });
       return;
@@ -128,7 +128,7 @@ const Dashboard = () => {
 
   const handleDeleteMember = async () => {
     if (!memberToDelete) return;
-    const email = localStorage.getItem("userEmail");
+    const email = Cookies.get("userEmail");
     if (!email) {
       toast.error("User not logged in", { autoClose: 2000 });
       return;
@@ -250,7 +250,7 @@ const Dashboard = () => {
                           <span
                             className="pdf-icon"
                             onClick={async () => {
-                              const email = localStorage.getItem("userEmail");
+                              const email =Cookies.get("userEmail");
                               if (!email) {
                                 toast.error("User not logged in", {
                                   autoClose: 2000,
