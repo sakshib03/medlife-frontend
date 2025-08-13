@@ -1,23 +1,34 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import Cookies from "js-cookie";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // null = still checking cookies, true/false = known status
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
 
   useEffect(() => {
-    // Check auth status on app load
-    const userEmail = localStorage.getItem("userEmail");
-    setIsAuthenticated(!!userEmail);
+    const token = Cookies.get("accessToken");
+    setIsAuthenticated(!!token);
   }, []);
 
-  const login = (email) => {
-    localStorage.setItem("userEmail", email);
+  const login = (email, token) => {
+    Cookies.set("accessToken", token, {
+      expires: 7, // 7 days
+      secure: true,
+      sameSite: "Strict"
+    });
+    Cookies.set("userEmail", email, {
+      expires: 7,
+      secure: true,
+      sameSite: "Strict"
+    });
     setIsAuthenticated(true);
   };
 
   const logout = () => {
-    localStorage.removeItem("userEmail");
+    Cookies.remove("accessToken");
+    Cookies.remove("userEmail");
     setIsAuthenticated(false);
   };
 

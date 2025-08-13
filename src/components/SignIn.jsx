@@ -6,12 +6,14 @@ import sidelogo from "../assets/signup.png";
 import medlife from "../assets/v987-18a-removebg-preview.png";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 const SignIn = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth(); // use login from AuthContext
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -26,12 +28,11 @@ const SignIn = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ login: username, password }),
       });
-      const data = await response.json();
-      if (response.ok) {
-        // Store access token in localStorage
-        localStorage.setItem("accessToken", data.access_token);
-        localStorage.setItem("userEmail", data.email);
 
+      const data = await response.json();
+
+      if (response.ok) {
+        login(data.email, data.access_token); // store token & email in cookies
         toast.success("Login successful!", {
           position: "top-right",
           autoClose: 2000,
@@ -40,46 +41,26 @@ const SignIn = () => {
           draggable: true,
           progress: undefined,
           onClose: () => {
-            navigate("/disclaimer"); // Redirect to disclaimer page after login
+            navigate("/disclaimer");
           },
         });
       } else {
         toast.error(data.detail || "Invalid email or password.", {
           position: "top-right",
           autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
         });
       }
     } catch (error) {
       toast.error("An error occurred. Please try again later.", {
         position: "top-right",
         autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
       });
     }
   };
 
   return (
     <div className="background-content">
-      <ToastContainer
-        position="top-right"
-        autoClose={2000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
+      <ToastContainer />
       <header>
         <div className="header-left">
           <img src={medlife} alt="MedLife AI Logo" className="logo" />
@@ -92,15 +73,11 @@ const SignIn = () => {
       <div className="container">
         <div className="form-container">
           <h1>Sign In to Medlife.ai</h1>
-          <p style={{ color: "#6b6a6a" }}>
+          <p style={{ color: "#6b6a6a", marginBottom:"20px" }}>
             Sign In to Medlife.ai to continue to Application
           </p>
           <form onSubmit={handleSubmit}>
-            <br />
-            <label
-              htmlFor="username"
-              style={{ color: "gray", fontSize: "14px" }}
-            >
+            <label htmlFor="username" style={{ color: "gray", fontSize: "14px" , }}>
               User Name or Email
             </label>
             <input
@@ -112,10 +89,7 @@ const SignIn = () => {
             />
 
             <div style={{ position: "relative", marginBottom: "20px" }}>
-              <label
-                htmlFor="password"
-                style={{ color: "gray", fontSize: "14px" }}
-              >
+              <label htmlFor="password" style={{ color: "gray", fontSize: "14px" }}>
                 Password
               </label>
               <input
@@ -124,7 +98,7 @@ const SignIn = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                style={{ paddingRight: "30px" }} // Add padding to prevent text under the icon
+                style={{ paddingRight: "30px" }}
               />
               <button
                 type="button"
@@ -132,7 +106,7 @@ const SignIn = () => {
                 style={{
                   position: "absolute",
                   right: "10px",
-                  top: "38px", // Adjust based on your layout
+                  top: "38px",
                   background: "none",
                   border: "none",
                   cursor: "pointer",
@@ -142,8 +116,7 @@ const SignIn = () => {
                 {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
               </button>
             </div>
-            {/* 
-<button type="button" style={{ color: "blue", background: "none", border: "none", padding: 0, textDecoration: "underline", cursor: "pointer" }} className="forgot">Forgot password</button> */}
+
             <button type="submit" className="sign-in-btn">
               Sign In
             </button>
@@ -160,10 +133,7 @@ const SignIn = () => {
                   textDecoration: "underline",
                   cursor: "pointer",
                 }}
-                className="sign-up"
-                onClick={() => {
-                  navigate("/signup");
-                }}
+                onClick={() => navigate("/signup")}
               >
                 Sign Up
               </button>

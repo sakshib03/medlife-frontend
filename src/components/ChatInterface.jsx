@@ -172,7 +172,7 @@ const ChatInterface = () => {
       // best-effort remote sync
       try {
         await fetch(`${API_BASE}chats?email=${encodeURIComponent(email)}`, {
-          method: "PUT",
+          method: "GET",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ chats: next }),
         });
