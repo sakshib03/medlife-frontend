@@ -2,13 +2,13 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import Cookies from "js-cookie";
 
 const AuthContext = createContext();
-
+const token = Cookies.get("accessToken");
 export const AuthProvider = ({ children }) => {
   // null = still checking cookies, true/false = known status
   const [isAuthenticated, setIsAuthenticated] = useState(null);
 
   useEffect(() => {
-    const token = Cookies.get("accessToken");
+    
     setIsAuthenticated(!!token);
   }, []);
 

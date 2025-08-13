@@ -48,7 +48,7 @@ const Dashboard = () => {
   }, []);
 
   const fetchMembers = async () => {
-    const email = localStorage.getItem("userEmail");
+    const email = Cookies.get("userEmail");
     if (!email) {
       navigate("/signin");
       return;
