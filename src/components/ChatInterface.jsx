@@ -728,7 +728,7 @@ const ChatInterface = () => {
 
       <div className="chat-container">
         <div className="sidebar">
-          <div style={{ marginTop: "30px" }}>
+          <div style={{ marginTop: "50px" }}>
             <h3>Recommended Health Questions</h3>
             <ul>
               <li

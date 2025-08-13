@@ -154,7 +154,7 @@ nav {
 
 /* Hide Sign-in on small screens */
 @media (max-width: 768px) {
-  .sign-in { display: none; }
+  .sign-in { margin-left: 110px; }
 }
 
 /* ===== HERO ===== */
