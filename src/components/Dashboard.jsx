@@ -5,6 +5,7 @@ import "./css_files/Dashboard.css";
 import medlife from "../assets/v987-18a-removebg-preview.png";
 import { useNavigate } from "react-router-dom";
 import { Edit, Download, User,Trash  } from "lucide-react";
+import Cookies from "js-cookie";
 
 const Dashboard = () => {
   const navigate = useNavigate();
