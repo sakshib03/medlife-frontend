@@ -212,7 +212,7 @@ nav {
   gap: 10px;
   padding: 20px;
   border-radius: 12px;
-  background-color: #fceeeb;
+  background-color: #fcf3f1;
 }
 .feature-box img { width: 30px; height: 30px; }
 .feature-box h3 { font-size: 1rem; margin: 0; }
@@ -268,6 +268,20 @@ nav {
 }
 .pricing-card ul { list-style: none; padding: 0; margin: 0; text-align: left; }
 .pricing-card ul li { font-size: 12px; margin: 5px 0; }
+
+.faqs-card{
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  flex: 1 1 250px;
+  max-width: 380px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  background-color: white;
+  text-align: center;
+}
 
 /* ===== FOOTER ===== */
 .footer-contact {

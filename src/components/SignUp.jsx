@@ -74,7 +74,7 @@ const SignUp = () => {
   }
 
   try {
-    const response = await fetch('https://semantic.onesmarter.com/medlifeV2/signup', {
+    const response = await fetch('http://localhost:8000/medlifeV21/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, email, password })

@@ -20,6 +20,7 @@ import icon4 from "../assets/welcome-assets/img14.png";
 import icon5 from "../assets/welcome-assets/img15.png";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 function WelcomePage() {
   const { loginWithRedirect, user, isAuthenticated } = useAuth0();
@@ -28,10 +29,24 @@ function WelcomePage() {
   const [activeLink, setActiveLink] = useState("home");
   const navigate = useNavigate();
 
+    const [openIndex, setOpenIndex] = useState(null);
+
   const homeRef = useRef(null);
   const featuresRef = useRef(null);
-  const pricingRef = useRef(null);
+  const faqsRef = useRef(null);
   const contactRef = useRef(null);
+
+  const faqs = [
+    { 
+      question: "Is the API key free to use?", 
+      answer: "Some API keys are free and can be used without any charges, while others require a paid subscription." 
+    },
+    { 
+      question: "Which API keys are free to use and which require payment?", 
+      answer: "The Gemini and Mistral API keys are available for free use. The Claude and OpenAI API keys require a paid subscription." 
+    },
+  ];
+
 
   // Force top-of-page on first load and clear any hash so it doesn't jump
   useEffect(() => {
@@ -56,9 +71,9 @@ function WelcomePage() {
     }
   };
   const scrollToPricing = () => {
-    if (pricingRef.current) {
-      pricingRef.current.scrollIntoView({ behavior: "smooth" });
-      setActiveLink("pricing");
+    if (faqsRef.current) {
+      faqsRef.current.scrollIntoView({ behavior: "smooth" });
+      setActiveLink("faqs");
     }
   };
   const scrollToContact = () => {
@@ -76,7 +91,7 @@ function WelcomePage() {
     const sections = [
       { id: "home", ref: homeRef },
       { id: "features", ref: featuresRef },
-      { id: "pricing", ref: pricingRef },
+      { id: "faqs", ref: faqsRef },
       { id: "contact", ref: contactRef },
     ];
 
@@ -134,17 +149,17 @@ function WelcomePage() {
             Features
           </a>
           <a
-            href="#pricing"
-            className={activeLink === "pricing" ? "active" : ""}
-            aria-current={activeLink === "pricing" ? "page" : undefined}
+            href="#faqs"
+            className={activeLink === "faqs" ? "active" : ""}
+            aria-current={activeLink === "faqs" ? "page" : undefined}
             onClick={(e) => {
               e.preventDefault();
               scrollToPricing();
               closeMenu();
             }}
           >
-            Pricing
-          </a>
+            FAQs
+          </a> 
           <a
             href="#contact"
             className={activeLink === "contact" ? "active" : ""}
@@ -237,7 +252,7 @@ function WelcomePage() {
       </div>
 
       {/* Pricing */}
-      <div className="sales-container" id="pricing" ref={pricingRef}>
+      {/* <div className="sales-container" id="pricing" ref={faqsRef}>
         <h1>Plans and Pricing</h1>
         <p>Simple, transparent pricing that scales with your usage</p>
         <div className="pricing-cards">
@@ -258,7 +273,74 @@ function WelcomePage() {
             </div>
           ))}
         </div>
+      </div> */}
+
+      <div style={{ backgroundColor:"white", maxWidth:"100%"}} ref={faqsRef}>
+    <div 
+      style={{ 
+        maxWidth: "1000px", 
+        margin: "0 auto", 
+        padding: "40px 20px", 
+        fontFamily: "Arial, sans-serif", 
+
+      }}
+    >
+      <h1 
+        style={{ 
+          textAlign: "center", 
+          fontSize: "26px", 
+          marginBottom: "30px", 
+          color: "#222" 
+        }}
+      >
+        FAQs
+      </h1>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+        {faqs.map((faq, index) => (
+          <div 
+            key={index} 
+            style={{ 
+              border: "1px solid #e0e0e0", 
+              borderRadius: "10px", 
+              backgroundColor: "#f4f9fa", 
+              boxShadow: "0px 2px 6px rgba(0,0,0,0.08)" 
+            }}
+          >
+            {/* Question header */}
+            <div
+              onClick={() => setOpenIndex(openIndex === index ? null : index)}
+              style={{ 
+                padding: "18px 18px", 
+                cursor: "pointer", 
+                display: "flex", 
+                justifyContent: "space-between", 
+                alignItems: "center" 
+              }}
+            >
+              <h2 style={{ fontSize: "1rem", fontWeight: "500", margin: 0, color: "#333" }}>
+                {faq.question}
+              </h2>
+              <span style={{ fontSize: "20px", color: "#666" }}>
+                {openIndex === index ? (
+                <ChevronUp size={22} color="#666" />
+              ) : (
+                <ChevronDown size={22} color="#666" />
+              )}
+              </span>
+            </div>
+
+            {/* Answer dropdown */}
+            {openIndex === index && (
+              <div style={{ padding: "0 22px 18px 22px", color: "#555", fontSize: "15px" }}>
+                {faq.answer}
+              </div>
+            )}
+          </div>
+        ))}
       </div>
+    </div>
+ </div>
 
       {/* Footer */}
       <div className="footer-contact" style={{ padding: "20px", color: "white" }} ref={contactRef} id="contact">
@@ -323,16 +405,16 @@ function WelcomePage() {
               </button>
             </div>
             <div style={{ marginTop: "40px", display: "flex", gap: "10px" }}>
-              <a href="https://www.facebook.com/yourprofile">
+              <a href="http://www.facebook.com/yourprofile">
                 <Facebook size={22} color="white" />
               </a>
-              <a href="https://twitter.com/yourprofile">
+              <a href="http://twitter.com/yourprofile">
                 <Twitter size={22} color="white" />
               </a>
-              <a href="https://www.linkedin.com/in/yourprofile">
+              <a href="http://www.linkedin.com/in/yourprofile">
                 <Linkedin size={22} color="white" />
               </a>
-              <a href="https://www.linkedin.com/in/yourprofile">
+              <a href="http://www.linkedin.com/in/yourprofile">
                 <Youtube size={22} color="white" />
               </a>
             </div>

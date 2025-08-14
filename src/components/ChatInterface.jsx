@@ -27,7 +27,7 @@ import {
 
 const PROVIDERS = ["openai", "gemini", "claude", "mistral"];
 const properName = (p) => p.charAt(0).toUpperCase() + p.slice(1);
-const API_BASE = "https://semantic.onesmarter.com/medlifeV2/";
+const API_BASE = "http://localhost:8000/";
 
 // Prefer stable ids from server; fallback to UUID / timestamp
 const makeId = () =>

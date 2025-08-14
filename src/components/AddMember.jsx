@@ -65,7 +65,7 @@ const AddMember = () => {
     };
 
     try {
-      const response = await fetch("https://semantic.onesmarter.com/medlifeV2/addmember", {
+      const response = await fetch("http://localhost:8000/medlifeV21/addmember", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(memberData),
@@ -107,7 +107,7 @@ const AddMember = () => {
 
     try {
       const response = await fetch(
-        `https://semantic.onesmarter.com/medlifeV2/medlife/editmember?email=${encodeURIComponent(
+        `http://localhost:8000/medlifeV21/editmember?email=${encodeURIComponent(
           email
         )}&member_name=${encodeURIComponent(
           formData.firstName + "," + formData.lastName
@@ -135,10 +135,10 @@ const AddMember = () => {
   };
 
   const handleSubmit = () => {
-    if (!validateForm()) {
-      toast.error("Please add all the fields");
-      return;
-    }
+    // if (!validateForm()) {
+    //   toast.error("Please add all the fields");
+    //   return;
+    // }
     if (isEditMode) {
       editMember();
     } else {
@@ -180,7 +180,7 @@ const AddMember = () => {
       <div className="new-member-form-container">
         <div className="new-member-form-section">
           <h3 className="new-member-h3">Personal Information</h3>
-          <label className="new-member-label">First Name *</label>
+          <label className="new-member-label">First Name</label>
           <input
             type="text"
             id="firstName"
@@ -190,7 +190,7 @@ const AddMember = () => {
             onChange={handleChange}
           />
 
-          <label className="new-member-label">Last Name *</label>
+          <label className="new-member-label">Last Name</label>
           <input
             type="text"
             id="lastName"
@@ -200,7 +200,7 @@ const AddMember = () => {
             onChange={handleChange}
           />
 
-          <label className="new-member-label">DOB *</label>
+          <label className="new-member-label">DOB</label>
           <input
             type="date"
             id="dob"
@@ -210,7 +210,7 @@ const AddMember = () => {
             onChange={handleChange}
           />
 
-          <label className="new-member-label">Race *</label>
+          <label className="new-member-label">Race</label>
           <input
             type="text"
             id="race"
@@ -220,7 +220,7 @@ const AddMember = () => {
             onChange={handleChange}
           />
 
-          <label className="new-member-label">Gender *</label>
+          <label className="new-member-label">Gender</label>
           <input
             type="text"
             id="gender"
@@ -229,11 +229,21 @@ const AddMember = () => {
             value={formData.gender}
             onChange={handleChange}
           />
+
+          <label className="new-member-label">Zip Code</label>
+          <input
+            type="text"
+            id="zip"
+            className="new-member-input"
+            placeholder={formData.zip || "43001"}
+            value={formData.zip}
+            onChange={handleChange}
+          />
         </div>
 
         <div className="new-member-form-section">
           <h3 className="new-member-h3">Medical Information</h3>
-          <label className="new-member-label">Height *</label>
+          <label className="new-member-label">Height</label>
           <input
             type="text"
             id="height"
@@ -243,7 +253,7 @@ const AddMember = () => {
             onChange={handleChange}
           />
 
-          <label className="new-member-label">Weight *</label>
+          <label className="new-member-label">Weight</label>
           <input
             type="text"
             id="weight"
@@ -253,7 +263,7 @@ const AddMember = () => {
             onChange={handleChange}
           />
 
-          <label className="new-member-label">A1C *</label>
+          <label className="new-member-label">A1C</label>
           <input
             type="text"
             id="a1c"
@@ -263,7 +273,7 @@ const AddMember = () => {
             onChange={handleChange}
           />
 
-          <label className="new-member-label">Blood Pressure *</label>
+          <label className="new-member-label">Blood Pressure</label>
           <input
             type="text"
             id="bloodPressure"
@@ -273,7 +283,7 @@ const AddMember = () => {
             onChange={handleChange}
           />
 
-          <label className="new-member-label">BMI *</label>
+          <label className="new-member-label">BMI</label>
           <input
             type="text"
             id="bmi"
@@ -286,7 +296,7 @@ const AddMember = () => {
       </div>
 
       <div className="new-member-prescription-container">
-        <label className="new-member-label">Prescription *</label>
+        <label className="new-member-label">Prescription</label>
         <textarea
           id="prescription"
           className="new-member-textarea"

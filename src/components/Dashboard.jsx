@@ -26,7 +26,7 @@ const Dashboard = () => {
 
     if (email) {
       fetch(
-        `https://semantic.onesmarter.com/medlifeV2/get-username?email=${encodeURIComponent(
+        `http://localhost:8000/medlifeV21/get-username?email=${encodeURIComponent(
           email
         )}`
       )
@@ -57,7 +57,7 @@ const Dashboard = () => {
 
     try {
       const response = await fetch(
-        `https://semantic.onesmarter.com/medlifeV2/getmember?email=${encodeURIComponent(
+        `http://localhost:8000/medlifeV21/getmember?email=${encodeURIComponent(
           email
         )}`
       );
@@ -86,6 +86,10 @@ const Dashboard = () => {
   };
 
   const handleAddMember = () => {
+    if (data.length >= 4) {
+    toast.error("Maximum of 4 members allowed per user", { autoClose: 2000 });
+    return;
+  }
     navigate("/medlife/addmember");
   };
 
@@ -98,7 +102,7 @@ const Dashboard = () => {
 
     try {
       const response = await fetch(
-        `https://semantic.onesmarter.com/medlifeV2/member-details/${encodeURIComponent(
+        `http://localhost:8000/medlifeV21/member-details/${encodeURIComponent(
           email
         )}/${member.memberIndex}`
       );
@@ -136,7 +140,7 @@ const Dashboard = () => {
 
     try {
       const response = await fetch(
-        `https://semantic.onesmarter.com/medlifeV2/deletemember?email=${encodeURIComponent(
+        `http://localhost:8000/medlifeV21/deletemember?email=${encodeURIComponent(
           email
         )}&member_index=${memberToDelete.memberIndex}`,
         {
@@ -261,7 +265,7 @@ const Dashboard = () => {
                               try {
                                 // Fetch chat data from backend
                                 const response = await fetch(
-                                  `https://semantic.onesmarter.com/medlifeV2/fetchChat/?email=${encodeURIComponent(
+                                  `http://localhost:8000/medlifeV21/fetchChat/?email=${encodeURIComponent(
                                     email
                                   )}&member_name=${encodeURIComponent(
                                     item.firstName + "_" + item.lastName

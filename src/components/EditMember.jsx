@@ -21,7 +21,7 @@ const EditMember = () => {
     weight: "200lbs",
     a1c: "10.5",
     bloodPressure: "150/90",
-    bmi: "29",
+    bmi: "",
     prescription:
       "Metformin, Januvia, Acebutolol, Betaxolol, Aspirin, Etizolam, Elavil",
   });
@@ -29,16 +29,16 @@ const EditMember = () => {
   useEffect(() => {
     if (member) {
       setFormData({
-        firstName: member.firstName || "John",
-        lastName: member.lastName || "Smith",
-        dob: member.dob || "2025-08-13",
-        race: member.race || "Asian Indian",
-        gender: member.gender || "Male",
-        height: member.height || "5.10ft",
-        weight: member.weight || "200lbs",
-        a1c: member.a1c || "10.5",
-        bloodPressure: member.bloodPressure || "150/90",
-        bmi: member.bmi || "29",
+        firstName: member.firstName ,
+        lastName: member.lastName,
+        dob: member.dob,
+        race: member.race ,
+        gender: member.gender ,
+        height: member.height ,
+        weight: member.weight ,
+        a1c: member.a1c ,
+        bloodPressure: member.bloodPressure,
+        bmi: member.bmi,
         prescription:
           member.medicine ||
           "Metformin, Januvia, Acebutolol, Betaxolol, Aspirin, Etizolam, Elavil",
@@ -68,14 +68,14 @@ const EditMember = () => {
       a1c: formData.a1c.trim(),
       bloodPressure: formData.bloodPressure.trim(),
       medicine: formData.prescription.trim(),
-      bmi: parseInt(formData.bmi) || 0,
+      bmi: formData.bmi ? formData.bmi.trim() : null,
       tokens: member?.tokens || 0,
       email: email,
     };
 
     try {
       const response = await fetch(
-        `https://semantic.onesmarter.com/medlifeV2/editmember?email=${encodeURIComponent(
+        `http://localhost:8000/medlifeV21/editmember?email=${encodeURIComponent(
           email
         )}&member_index=${member?.memberIndex || 1}`,
         {
@@ -155,7 +155,7 @@ const EditMember = () => {
       <div className="new-member-form-container">
         <div className="new-member-form-section">
           <h3 className="new-member-h3">Personal Information</h3>
-          <label className="new-member-label">First Name *</label>
+          <label className="new-member-label">First Name</label>
           <input
             type="text"
             id="firstName"
@@ -165,7 +165,7 @@ const EditMember = () => {
             required
           />
 
-          <label className="new-member-label">Last Name *</label>
+          <label className="new-member-label">Last Name</label>
           <input
             type="text"
             id="lastName"
@@ -175,7 +175,7 @@ const EditMember = () => {
             required
           />
 
-          <label className="new-member-label">DOB *</label>
+          <label className="new-member-label">DOB</label>
           <input
             type="date"
             id="dob"
@@ -201,11 +201,20 @@ const EditMember = () => {
             value={formData.gender}
             onChange={handleChange}
           />
+           <label className="new-member-label">Zip Code</label>
+          <input
+            type="text"
+            id="zip"
+            className="new-member-input"
+            placeholder={formData.zip}
+            value={formData.zip}
+            onChange={handleChange}
+          />
         </div>
 
         <div className="new-member-form-section">
           <h3 className="new-member-h3">Medical Information</h3>
-          <label className="new-member-label">Height *</label>
+          <label className="new-member-label">Height</label>
           <input
             type="text"
             id="height"
@@ -214,7 +223,7 @@ const EditMember = () => {
             onChange={handleChange}
           />
 
-          <label className="new-member-label">Weight *</label>
+          <label className="new-member-label">Weight</label>
           <input
             type="text"
             id="weight"
@@ -253,7 +262,7 @@ const EditMember = () => {
       </div>
 
       <div className="new-member-prescription-container">
-        <label className="new-member-label">Prescription *</label>
+        <label className="new-member-label">Prescription</label>
         <textarea
           id="prescription"
           className="new-member-textarea"
