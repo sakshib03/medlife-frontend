@@ -15,6 +15,7 @@ const AddMember = () => {
     dob: "",
     race: "",
     gender: "",
+    zipCode: "",
     height: "",
     weight: "",
     a1c: "",
@@ -55,6 +56,7 @@ const AddMember = () => {
       dob: formData.dob.trim(),
       race: formData.race.trim(),
       gender: formData.gender.trim(),
+      zipCode: formData.zipCode.trim(),
       height: formData.height.replace("ft", ""),
       weight: formData.weight.replace("lbs", ""),
       a1c: formData.a1c.trim(),
@@ -95,6 +97,7 @@ const AddMember = () => {
       dob: formData.dob.trim(),
       race: formData.race.trim(),
       gender: formData.gender.trim(),
+      zipCode: formData.zipCode.trim(),
       height: formData.height.replace("ft", ""),
       weight: formData.weight.replace("lbs", ""),
       a1c: formData.a1c.trim(),
@@ -233,10 +236,10 @@ const AddMember = () => {
           <label className="new-member-label">Zip Code</label>
           <input
             type="text"
-            id="zip"
+            id="zipCode"
             className="new-member-input"
-            placeholder={formData.zip || "43001"}
-            value={formData.zip}
+            placeholder={formData.zipCode || "43001"}
+            value={formData.zipCode}
             onChange={handleChange}
           />
         </div>

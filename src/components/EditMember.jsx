@@ -17,6 +17,7 @@ const EditMember = () => {
     dob: "2025-08-13",
     race: "Asian Indian",
     gender: "Male",
+    zipCode: "43001",
     height: "5.10ft",
     weight: "200lbs",
     a1c: "10.5",
@@ -34,6 +35,7 @@ const EditMember = () => {
         dob: member.dob,
         race: member.race ,
         gender: member.gender ,
+        zipCode: member.zipCode,
         height: member.height ,
         weight: member.weight ,
         a1c: member.a1c ,
@@ -63,6 +65,7 @@ const EditMember = () => {
       dob: formData.dob.trim(),
       race: formData.race.trim(),
       gender: formData.gender.trim(),
+      zipCode: formData.zipCode.trim(),
       height: formData.height.replace("ft", "").trim(),
       weight: formData.weight.replace("lbs", "").trim(),
       a1c: formData.a1c.trim(),
@@ -206,8 +209,8 @@ const EditMember = () => {
             type="text"
             id="zip"
             className="new-member-input"
-            placeholder={formData.zip}
-            value={formData.zip}
+            placeholder={formData.zipCode}
+            value={formData.zipCode}
             onChange={handleChange}
           />
         </div>
