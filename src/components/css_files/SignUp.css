@@ -90,7 +90,9 @@ header {
 }
 
 .form-container input[type="text"],
-.form-container input[type="password"] {
+.form-container input[type="password"],
+.form-container input[type="tel"],
+.form-container input[type="email"]  {
     width: 100%;
     padding: 0.6rem;
     margin: 0.5rem 0;

@@ -2,7 +2,7 @@ import React from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import './output.css';
 import WelcomePage from './components/WelcomePage';
-import SignIn from './components/SignIn';
+import Login from './components/Login';
 import SignUp from './components/SignUp';
 import Dashboard from './components/Dashboard';
 import Disclaimer from './components/Disclaimer';
@@ -16,7 +16,7 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/" element={<WelcomePage />} />
-        <Route path="/signin" element={<SignIn />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
 
         {/* Protected Routes */}

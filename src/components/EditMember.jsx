@@ -17,12 +17,12 @@ const EditMember = () => {
     dob: "2025-08-13",
     race: "Asian Indian",
     gender: "Male",
-    zipCode: "43001",
     height: "5.10ft",
     weight: "200lbs",
     a1c: "10.5",
     bloodPressure: "150/90",
     bmi: "",
+    zip_code: "43001",
     prescription:
       "Metformin, Januvia, Acebutolol, Betaxolol, Aspirin, Etizolam, Elavil",
   });
@@ -30,20 +30,20 @@ const EditMember = () => {
   useEffect(() => {
     if (member) {
       setFormData({
-        firstName: member.firstName ,
-        lastName: member.lastName,
-        dob: member.dob,
-        race: member.race ,
-        gender: member.gender ,
-        zipCode: member.zipCode,
-        height: member.height ,
-        weight: member.weight ,
-        a1c: member.a1c ,
-        bloodPressure: member.bloodPressure,
-        bmi: member.bmi,
+        firstName: member.firstName || "",
+        lastName: member.lastName || "",
+        dob: member.dob || "",
+        race: member.race || "",
+        gender: member.gender || "",
+        height: member.height || "",
+        weight: member.weight || "",
+        a1c: member.a1c || "",
+        bloodPressure: member.bloodPressure || "",
+        bmi: member.bmi || "",
+        zip_code: member.zip_code || "",
         prescription:
           member.medicine ||
-          "Metformin, Januvia, Acebutolol, Betaxolol, Aspirin, Etizolam, Elavil",
+          "",
       });
     }
   }, [member]);
@@ -56,35 +56,39 @@ const EditMember = () => {
     }));
   };
 
-  const editMember = async () => {
-    const email = Cookies.get("userEmail");
+  const safeNumberText = (v) => {
+    if (!v) return "";
+    return String(v).replace(/[^\d.]/g, "");
+  };
 
-    const memberData = {
-      firstName: formData.firstName.trim(),
-      lastName: formData.lastName.trim(),
-      dob: formData.dob.trim(),
-      race: formData.race.trim(),
-      gender: formData.gender.trim(),
-      zipCode: formData.zipCode.trim(),
-      height: formData.height.replace("ft", "").trim(),
-      weight: formData.weight.replace("lbs", "").trim(),
-      a1c: formData.a1c.trim(),
-      bloodPressure: formData.bloodPressure.trim(),
-      medicine: formData.prescription.trim(),
-      bmi: formData.bmi ? formData.bmi.trim() : null,
-      tokens: member?.tokens || 0,
-      email: email,
+  const editMember = async () => {
+    const email = Cookies.get("userEmail") || "";
+    const memberIndex = member?.memberIndex || 1;
+
+    // Build payload to match FastAPI Data model exactly
+    const payload = {
+      firstName: (formData.firstName || "").trim(),
+      lastName: (formData.lastName || "").trim(),
+      dob: (formData.dob || "").trim(),
+      race: (formData.race || "").trim(),
+      gender: (formData.gender || "").trim(),
+      height: safeNumberText(formData.height), // "5.10" from "5.10ft"
+      weight: safeNumberText(formData.weight), // "200" from "200lbs"
+      a1c: (formData.a1c || "").trim(),
+      bloodPressure: (formData.bloodPressure || "").trim(),
+      medicine: (formData.prescription || "").trim(),
+      zip_code: (formData.zip_code || "").trim(),
+      bmi: safeNumberText(formData.bmi),
+      email, // required by backend body schema
     };
 
     try {
       const response = await fetch(
-        `http://localhost:8000/medlifeV21/editmember?email=${encodeURIComponent(
-          email
-        )}&member_index=${member?.memberIndex || 1}`,
+        `http://localhost:8000/medlifeV21/editmember?member_index=${memberIndex}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(memberData),
+          body: JSON.stringify(payload),
         }
       );
 
@@ -100,33 +104,30 @@ const EditMember = () => {
             hideProgressBar: false,
             closeOnClick: true,
             draggable: true,
-            progress: undefined,
           }
         );
         return;
       }
 
-      if (response.ok) {
-        toast.success("Member updated successfully!", {
-          position: "top-right",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          draggable: true,
-          progress: undefined,
-        });
-      }
+      toast.success("Member updated successfully!", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        draggable: true,
+      });
 
-      navigate("/dashboard");
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 2000);
     } catch (error) {
       toast.error("Server error: " + error.message, {
-    position: "top-right",
-    autoClose: 2000,
-    hideProgressBar: false,
-    closeOnClick: true,
-    draggable: true,
-    progress: undefined,
-  });
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        draggable: true,
+      });
     }
   };
 
@@ -136,6 +137,7 @@ const EditMember = () => {
 
   return (
     <div className="new-member-container">
+      <ToastContainer position="top-right" autoClose={2000} />
       <header>
         <div className="header-left">
           <img src={medlife} alt="MedLife AI Logo" className="logo" />
@@ -158,6 +160,7 @@ const EditMember = () => {
       <div className="new-member-form-container">
         <div className="new-member-form-section">
           <h3 className="new-member-h3">Personal Information</h3>
+
           <label className="new-member-label">First Name</label>
           <input
             type="text"
@@ -204,19 +207,20 @@ const EditMember = () => {
             value={formData.gender}
             onChange={handleChange}
           />
-           <label className="new-member-label">Zip Code</label>
+
+          <label className="new-member-label">Zip Code</label>
           <input
             type="text"
-            id="zip"
+            id="zip_code"
             className="new-member-input"
-            placeholder={formData.zipCode}
-            value={formData.zipCode}
+            value={formData.zip_code}
             onChange={handleChange}
           />
         </div>
 
         <div className="new-member-form-section">
           <h3 className="new-member-h3">Medical Information</h3>
+
           <label className="new-member-label">Height</label>
           <input
             type="text"

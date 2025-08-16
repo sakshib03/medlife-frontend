@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./css_files/AddMember.css";
-import {ToastContainer, toast } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import medlife from "../assets/v987-18a-removebg-preview.png";
 import { useNavigate, useLocation } from "react-router-dom";
 import Cookies from "js-cookie";
@@ -15,12 +16,12 @@ const AddMember = () => {
     dob: "",
     race: "",
     gender: "",
-    zipCode: "",
     height: "",
     weight: "",
     a1c: "",
     bloodPressure: "",
     bmi: "",
+    zip_code: "",
     prescription: "",
   };
 
@@ -29,7 +30,7 @@ const AddMember = () => {
 
   useEffect(() => {
     if (location.state && location.state.member) {
-      setFormData(location.state.member);
+      setFormData((prev) => ({ ...prev, ...location.state.member }));
       setIsEditMode(true);
     }
   }, [location.state]);
@@ -42,29 +43,38 @@ const AddMember = () => {
     }));
   };
 
+  const safeNumberText = (v) => {
+    if (!v) return "";
+    const n = String(v).replace(/[^\d.]/g, "");
+    return n;
+  };
+
   const validateForm = () => {
-    return Object.values(formData).every((val) => val && val.trim() !== "");
+    // Optional fields—the API will store what’s provided.
+    return true;
+  };
+
+  const buildMemberPayload = (email) => {
+    return {
+      email,
+      firstName: (formData.firstName || "").trim(),
+      lastName: (formData.lastName || "").trim(),
+      dob: (formData.dob || "").trim(),
+      race: (formData.race || "").trim(),
+      gender: (formData.gender || "").trim(),
+      height: safeNumberText(formData.height),          // "5.10" from "5.10ft"
+      weight: safeNumberText(formData.weight),          // "200" from "200lbs"
+      a1c: (formData.a1c || "").trim(),
+      bloodPressure: (formData.bloodPressure || "").trim(),
+      medicine: (formData.prescription || "").trim(),
+      bmi: safeNumberText(formData.bmi),
+      zip_code: (formData.zip_code || "").trim(),
+    };
   };
 
   const addMember = async () => {
-    const email = Cookies.get("userEmail");
-
-    const memberData = {
-      email: email,
-      firstName: formData.firstName.trim(),
-      lastName: formData.lastName.trim(),
-      dob: formData.dob.trim(),
-      race: formData.race.trim(),
-      gender: formData.gender.trim(),
-      zipCode: formData.zipCode.trim(),
-      height: formData.height.replace("ft", ""),
-      weight: formData.weight.replace("lbs", ""),
-      a1c: formData.a1c.trim(),
-      bloodPressure: formData.bloodPressure.trim(),
-      medicine: formData.prescription.trim(),
-      bmi: parseInt(formData.bmi),
-      tokens: 0,
-    };
+    const email = Cookies.get("userEmail") || "";
+    const memberData = buildMemberPayload(email);
 
     try {
       const response = await fetch("http://localhost:8000/medlifeV21/addmember", {
@@ -80,40 +90,25 @@ const AddMember = () => {
         toast.error(data.detail || "Failed to add member");
         return;
       }
-
-      toast.success("Member Added successfully!");
-      navigate("/dashboard");
+      toast.success("Member added successfully!", { autoClose: 2000 });
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 2000);
     } catch (error) {
       toast.error("Server error: " + error.message);
     }
   };
 
   const editMember = async () => {
-    const email = Cookies.get("userEmail");
-
-    const memberData = {
-      firstName: formData.firstName.trim(),
-      lastName: formData.lastName.trim(),
-      dob: formData.dob.trim(),
-      race: formData.race.trim(),
-      gender: formData.gender.trim(),
-      zipCode: formData.zipCode.trim(),
-      height: formData.height.replace("ft", ""),
-      weight: formData.weight.replace("lbs", ""),
-      a1c: formData.a1c.trim(),
-      bloodPressure: formData.bloodPressure.trim(),
-      medicine: formData.prescription.trim(),
-      bmi: parseInt(formData.bmi),
-      tokens: 0,
-      email: email,
-    };
+    const email = Cookies.get("userEmail") || "";
+    const memberData = buildMemberPayload(email);
 
     try {
       const response = await fetch(
         `http://localhost:8000/medlifeV21/editmember?email=${encodeURIComponent(
           email
         )}&member_name=${encodeURIComponent(
-          formData.firstName + "," + formData.lastName
+          (formData.firstName || "") + "," + (formData.lastName || "")
         )}`,
         {
           method: "POST",
@@ -130,18 +125,20 @@ const AddMember = () => {
         return;
       }
 
-      toast.success("✅ Member updated successfully!");
-      navigate("/dashboard");
+      toast.success("✅ Member updated successfully!", { autoClose: 2000 });
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 2000);
     } catch (error) {
       toast.error("Server error: " + error.message);
     }
   };
 
   const handleSubmit = () => {
-    // if (!validateForm()) {
-    //   toast.error("Please add all the fields");
-    //   return;
-    // }
+    if (!validateForm()) {
+      toast.error("Please add all the fields");
+      return;
+    }
     if (isEditMode) {
       editMember();
     } else {
@@ -151,23 +148,11 @@ const AddMember = () => {
 
   return (
     <div className="new-member-container">
-    <ToastContainer
-        position="top-right"
-        autoClose={2000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
+      <ToastContainer position="top-right" autoClose={2000} />
       <header>
         <div className="header-left">
           <img src={medlife} alt="MedLife AI Logo" className="logo" />
-          <div>
-            <h1 className="title">MedLife AI</h1>
-          </div>
+        <div><h1 className="title">MedLife AI</h1></div>
         </div>
         <div>
           <button className="logout" onClick={() => navigate("/")}>
@@ -183,6 +168,7 @@ const AddMember = () => {
       <div className="new-member-form-container">
         <div className="new-member-form-section">
           <h3 className="new-member-h3">Personal Information</h3>
+
           <label className="new-member-label">First Name</label>
           <input
             type="text"
@@ -208,7 +194,7 @@ const AddMember = () => {
             type="date"
             id="dob"
             className="new-member-input"
-            placeholder={formData.dob || "Y2025-08-13"}
+            placeholder={formData.dob || "2025-08-13"}
             value={formData.dob}
             onChange={handleChange}
           />
@@ -236,16 +222,17 @@ const AddMember = () => {
           <label className="new-member-label">Zip Code</label>
           <input
             type="text"
-            id="zipCode"
+            id="zip_code"
             className="new-member-input"
-            placeholder={formData.zipCode || "43001"}
-            value={formData.zipCode}
+            placeholder={formData.zip_code || "43001"}
+            value={formData.zip_code}
             onChange={handleChange}
           />
         </div>
 
         <div className="new-member-form-section">
           <h3 className="new-member-h3">Medical Information</h3>
+
           <label className="new-member-label">Height</label>
           <input
             type="text"
@@ -303,7 +290,10 @@ const AddMember = () => {
         <textarea
           id="prescription"
           className="new-member-textarea"
-          placeholder={formData.prescription || "Metformin, Januvia, Acebutolol, Betaxolol, Aspirin, Etizolam, Elavil"}
+          placeholder={
+            formData.prescription ||
+            "Metformin, Januvia, Acebutolol, Betaxolol, Aspirin, Etizolam, Elavil"
+          }
           value={formData.prescription}
           onChange={handleChange}
         />

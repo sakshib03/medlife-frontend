@@ -1,24 +1,21 @@
 import React, { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
-import "./css_files/SignIn.css";
+import "./css_files/SignUp.css";
 import sidelogo from "../assets/signup.png";
 import medlife from "../assets/v987-18a-removebg-preview.png";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
 
 const SignUp = () => {
   const [username, setUsername] = useState("");
-  const [email, setEmail]= useState("");
-  
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [mobile, setMobile] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
+  const [mobileError, setMobileError] = useState("");
   const [emailFocused, setEmailFocused] = useState(false);
-  const [passwordFocused, setPasswordFocused] = useState(false);
-  const navigate=useNavigate();
+  const [mobileFocused, setMobileFocused] = useState(false);
+  const navigate = useNavigate();
 
   // Email validation function
   const validateEmail = (email) => {
@@ -26,80 +23,56 @@ const SignUp = () => {
     return emailRegex.test(email);
   };
 
-  // Password validation function
-  const validatePassword = (password) => {
-    const minLength = 8;
-    const hasUpperCase = /[A-Z]/.test(password);
-    const hasLowerCase = /[a-z]/.test(password);
-    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
-    const hasNumber = /[0-9]/.test(password);
-
-    if (password.length < minLength) {
-      return "Password must be at least 8 characters long";
-    }
-    if (!hasUpperCase) {
-      return "Password must contain at least one uppercase letter";
-    }
-    if (!hasLowerCase) {
-      return "Password must contain at least one lowercase letter";
-    }
-    if (!hasNumber) {
-      return "Password must contain at least one numeric digit";
-    }
-    if (!hasSpecialChar) {
-      return "Password must contain at least one special character (!@#$%^&*()_+-=[]{}|;:,.<>?)";
+  // Mobile number validation function
+  const validateMobile = (mobile) => {
+    const mobileRegex = /^[0-9]{10}$/; 
+    if (!mobileRegex.test(mobile)) {
+      return "Please enter a valid 10-digit mobile number";
     }
     return "";
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-
-
- const handleSubmit = async (event) => {
-  event.preventDefault();
-
-  // Final validations before API call
-  if (!validateEmail(email)) {
-    setEmailError("Invalid email format");
-    return; // Stop submission
-  }
-
-  const passwordValidationError = validatePassword(password);
-  if (passwordValidationError) {
-    setPasswordError(passwordValidationError);
-    return; // Stop submission
-  }
-
-  try {
-    const response = await fetch('http://localhost:8000/medlifeV21/signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, email, password })
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      toast.success('Signup successful!', {
-        position: "top-right",
-        autoClose: 2000,
-        onClose: () => navigate("/signin")
-      });
-    } else {
-      toast.error(data.detail || 'Signup failed.', { autoClose: 2000 });
+    // Final validations before API call
+    if (!validateEmail(email)) {
+      setEmailError("Invalid email format");
+      return; // Stop submission
     }
-  } catch (error) {
-    toast.error('An error occurred. Please try again later.', { autoClose: 2000 });
-  }
-};
+
+    const mobileValidationError = validateMobile(mobile);
+    if (mobileValidationError) {
+      setMobileError(mobileValidationError);
+      return; // Stop submission
+    }
+
+    try {
+      const response = await fetch('http://localhost:8000/medlifeV21/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, mobile })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success('Signup successful!', {
+          position: "top-right",
+          autoClose: 2000,
+          onClose: () => navigate("/login")
+        });
+      } else {
+        toast.error(data.detail || 'Signup failed.', { autoClose: 2000 });
+      }
+    } catch (error) {
+      toast.error('An error occurred. Please try again later.', { autoClose: 2000 });
+    }
+  };
 
   return (
     <div className="background-content">
-
-    <ToastContainer
+      <ToastContainer
         position="top-right"
         autoClose={2000}
         hideProgressBar={false}
@@ -109,7 +82,7 @@ const SignUp = () => {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-    />
+      />
       <header>
         <div className="header-left">
           <img src={medlife} alt="MedLife AI Logo" className="logo" />
@@ -122,15 +95,9 @@ const SignUp = () => {
       <div className="container">
         <div className="form-container">
           <h1>Sign Up to Medlife.ai</h1>
-          <p style={{ color: "#6b6a6a" }}>
-            Sign Up to Medlife.ai to continue to Application
-          </p>
           <form onSubmit={handleSubmit}>
             <br />
-            <label
-              htmlFor="username"
-              style={{ color: "gray", fontSize: "14px" }}
-            >
+            <label htmlFor="username" style={{ color: "gray", fontSize: "14px" }}>
               Username
             </label>
             <input
@@ -141,87 +108,74 @@ const SignUp = () => {
               required
             />
 
-            <label
-              htmlFor="username"
-              style={{ color: "gray", fontSize: "14px" }}
-            >
+            <label htmlFor="email" style={{ color: "gray", fontSize: "14px" }}>
               Email address
             </label>
             <input
               type="text"
-              id="email-address"
+              id="email"
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
-                if (emailFocused) {
-                  const emailValid = validateEmail(e.target.value);
-                  setEmailError(emailValid ? "" : "Invalid email format");
+                if (validateEmail(e.target.value)) {
+                  setEmailError(""); // Clear error when email is valid
+                } else if (emailFocused) {
+                  setEmailError("Invalid email format");
                 }
               }}
               onFocus={() => setEmailFocused(true)}
-              onBlur={() => setEmailFocused(false)}
+              onBlur={() => {
+                setEmailFocused(false);
+                if (!validateEmail(email)) {
+                  setEmailError("Invalid email format");
+                } else {
+                  setEmailError(""); // Clear error when email is valid
+                }
+              }}
               required
             />
-            {emailFocused && (
-              <p style={{ color: "red", fontSize: "12px" }}>
-                Please enter a valid email address (e.g. user@example.com)
+            {(emailFocused || emailError) && (
+              <p style={{ color: emailError ? "red" : "green", fontSize: "12px" }}>
+                {emailError}
               </p>
             )}
-            {emailError && !emailFocused && (
-              <p style={{ color: "red", fontSize: "12px" }}>{emailError}</p>
+
+            <label htmlFor="mobile" style={{ color: "gray", fontSize: "14px" }}>
+              Mobile Number
+            </label>
+            <input
+              type="tel"
+              id="mobile"
+              value={mobile}
+              onChange={(e) => {
+                setMobile(e.target.value);
+                const error = validateMobile(e.target.value);
+                if (!error) {
+                  setMobileError(""); // Clear error when mobile is valid
+                } else if (mobileFocused) {
+                  setMobileError(error);
+                }
+              }}
+              onFocus={() => setMobileFocused(true)}
+              onBlur={() => {
+                setMobileFocused(false);
+                const error = validateMobile(mobile);
+                if (error) {
+                  setMobileError(error);
+                } else {
+                  setMobileError(""); // Clear error when mobile is valid
+                }
+              }}
+              required
+              maxLength="10"
+              pattern="[0-9]{10}"
+            />
+            {(mobileFocused || mobileError) && (
+              <p style={{ color: mobileError ? "red" : "green", fontSize: "12px" }}>
+                {mobileError}
+              </p>
             )}
 
-          
-
-            <div style={{ position: "relative" }}>
-              <label
-                htmlFor="password"
-                style={{ color: "gray", fontSize: "14px" }}
-              >
-                Password
-              </label>
-              <input
-                type={showPassword ? "text" : "password"}
-                id="password"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  if (passwordFocused) {
-                    const passwordValidationError = validatePassword(e.target.value);
-                    setPasswordError(passwordValidationError);
-                  }
-                }}
-                onFocus={() => setPasswordFocused(true)}
-                onBlur={() => setPasswordFocused(false)}
-                required
-                style={{ paddingRight: "30px" }} // Add padding to prevent text under the icon
-              />
-              {passwordFocused && (
-                <p style={{ color: "red", fontSize: "12px" }}>
-                  Password must be at least 8 characters long, contain uppercase, lowercase, and special character.
-                </p>
-              )}
-              {passwordError && !passwordFocused && (
-                <p style={{ color: "red", fontSize: "12px" }}>{passwordError}</p>
-              )}
-              <button
-                type="button"
-                onClick={togglePasswordVisibility}
-                style={{
-                  position: "absolute",
-                  right: "10px",
-                  top: "38px", // Adjust based on your layout
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  color: "gray",
-                }}
-              >
-                {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
-              </button>
-            </div>
-
-            {/* <a style={{ color: "blue" }} className="forgot">Forgot password</a> */}
             <button type="submit" className="sign-in-btn">
               Sign Up
             </button>
@@ -234,15 +188,14 @@ const SignUp = () => {
 
             <p style={{ color: "gray" }}>
               Already have an account?{" "}
-              <a style={{ color: "blue" }} 
-              className="sign-up" 
-              onClick={()=>{
-                navigate("/signin")
-              }}>
-                Sign In
+              <a 
+                style={{ color: "blue" }} 
+                className="sign-up" 
+                onClick={() => navigate("/login")}
+              >
+                Log in
               </a>
             </p>
-
           </form>
         </div>
 

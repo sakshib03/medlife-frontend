@@ -10,7 +10,7 @@ const PrivateRoute = ({ element }) => {
     return <div>Loading...</div>;
   }
 
-  return isAuthenticated ? element : <Navigate to="/signin" replace />;
+  return isAuthenticated ? element : <Navigate to="/login" replace />;
 };
 
 export default PrivateRoute;

@@ -650,7 +650,7 @@ const ChatInterface = () => {
   const handleLogout = () => {
     localStorage.removeItem(keyFor("selectedAPI"));
     localStorage.removeItem(keyFor("currentMember"));
-    navigate("/signin");
+    navigate("/login");
   };
 
   const handleQuestionSelect = (q) => {
@@ -994,7 +994,7 @@ const ChatInterface = () => {
                       borderRadius: 6,
                       border: "1px solid #ccc",
                       width: "100%",
-                      color: "black",
+                      color: "gray",
                     }}
                   >
                     <option value="">Select Member</option>
@@ -1030,6 +1030,7 @@ const ChatInterface = () => {
                       borderRadius: 6,
                       border: "1px solid #ccc",
                       width: "100%",
+                      color:"gray"
                     }}
                   >
                     {!availableProviders.length && (

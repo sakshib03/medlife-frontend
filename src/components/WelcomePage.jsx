@@ -180,10 +180,10 @@ function WelcomePage() {
           className="sign-in"
           onClick={() => {
             closeMenu();
-            navigate("/signin");
+            navigate("/login");
           }}
         >
-          <i className="fa fa-user"></i> Sign In
+          <i className="fa fa-user"></i> Log In
         </button>
 
         <button className="menu-toggle" onClick={toggleMenu} aria-label="Menu">
