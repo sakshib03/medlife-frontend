@@ -7,8 +7,7 @@ import medlife from "../assets/v987-18a-removebg-preview.png";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react"; // kept as-is in case you add show/hide later
 import { useAuth } from "../context/AuthContext";
-
-const API_BASE = "http://localhost:8000/medlifeV21";
+import { API_BASE } from "../config";
 
 const Login = () => {
   const [login, setLogin] = useState("");

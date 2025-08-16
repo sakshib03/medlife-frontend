@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import medlife from "../assets/v987-18a-removebg-preview.png";
 import { useNavigate, useLocation } from "react-router-dom";
 import Cookies from "js-cookie";
+import { API_BASE } from "../config";
 
 const AddMember = () => {
   const navigate = useNavigate();
@@ -77,7 +78,7 @@ const AddMember = () => {
     const memberData = buildMemberPayload(email);
 
     try {
-      const response = await fetch("http://localhost:8000/medlifeV21/addmember", {
+      const response = await fetch(`${API_BASE}/addmember`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(memberData),
@@ -105,7 +106,7 @@ const AddMember = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/medlifeV21/editmember?email=${encodeURIComponent(
+        `${API_BASE}/editmember?email=${encodeURIComponent(
           email
         )}&member_name=${encodeURIComponent(
           (formData.firstName || "") + "," + (formData.lastName || "")

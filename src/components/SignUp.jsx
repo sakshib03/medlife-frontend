@@ -5,6 +5,7 @@ import "./css_files/SignUp.css";
 import sidelogo from "../assets/signup.png";
 import medlife from "../assets/v987-18a-removebg-preview.png";
 import { useNavigate } from "react-router-dom";
+import { API_BASE } from "../config";
 
 const SignUp = () => {
   const [username, setUsername] = useState("");
@@ -16,6 +17,7 @@ const SignUp = () => {
   const [emailFocused, setEmailFocused] = useState(false);
   const [mobileFocused, setMobileFocused] = useState(false);
   const navigate = useNavigate();
+
 
   // Email validation function
   const validateEmail = (email) => {
@@ -48,7 +50,7 @@ const SignUp = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/medlifeV21/signup', {
+      const response = await fetch(`${API_BASE}/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, email, mobile })

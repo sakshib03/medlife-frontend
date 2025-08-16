@@ -5,6 +5,7 @@ import "./css_files/AddMember.css";
 import medlife from "../assets/v987-18a-removebg-preview.png";
 import { useLocation, useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
+import { API_BASE } from "../config";
 
 const EditMember = () => {
   const location = useLocation();
@@ -84,7 +85,7 @@ const EditMember = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/medlifeV21/editmember?member_index=${memberIndex}`,
+        `${API_BASE}/editmember?member_index=${memberIndex}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

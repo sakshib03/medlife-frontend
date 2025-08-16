@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./css_files/Dashboard.css";
+import { API_BASE } from "../config";
 
 const DeleteMember = () => {
   const navigate = useNavigate();
@@ -24,7 +25,7 @@ const DeleteMember = () => {
       const memberName = `${member.firstName},${member.lastName}`;
       
       const response = await fetch(
-        `http://localhost:8000/medlifeV21/removemember?email=${encodeURIComponent(email)}&member_name=${encodeURIComponent(memberName)}`,
+        `${API_BASE}/removemember?email=${encodeURIComponent(email)}&member_name=${encodeURIComponent(memberName)}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

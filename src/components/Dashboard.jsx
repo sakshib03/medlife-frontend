@@ -6,6 +6,7 @@ import medlife from "../assets/v987-18a-removebg-preview.png";
 import { useNavigate } from "react-router-dom";
 import { Edit, Download, User, Trash } from "lucide-react";
 import Cookies from "js-cookie";
+import { API_BASE } from "../config.js";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -26,10 +27,7 @@ const Dashboard = () => {
 
     if (email) {
       fetch(
-        `http://localhost:8000/medlifeV21/get-username?email=${encodeURIComponent(
-          email
-        )}`
-      )
+        `${API_BASE}/get-username?email=${encodeURIComponent(email)}`)
         .then((res) => res.json())
         .then((res) => setUserName(res.username || "User"))
         .catch(() => setUserName("User"));
@@ -51,7 +49,7 @@ const Dashboard = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:8000/medlifeV21/getmember?email=${encodeURIComponent(
+        `${API_BASE}/getmember?email=${encodeURIComponent(
           email
         )}`
       );
@@ -99,7 +97,7 @@ const Dashboard = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/medlifeV21/member-details/${encodeURIComponent(
+        `${API_BASE}/member-details/${encodeURIComponent(
           email
         )}/${member.memberIndex}`
       );
@@ -139,7 +137,7 @@ const Dashboard = () => {
     setDeleting(true);
     try {
       const response = await fetch(
-        `http://localhost:8000/medlifeV21/deletemember?email=${encodeURIComponent(
+        `${API_BASE}/deletemember?email=${encodeURIComponent(
           email
         )}&member_index=${memberToDelete.memberIndex}`,
         { method: "DELETE" }
@@ -269,7 +267,7 @@ const Dashboard = () => {
 
                               try {
                                 const response = await fetch(
-                                  `http://localhost:8000/medlifeV21/fetchChat/?email=${encodeURIComponent(
+                                  `${API_BASE}/fetchChat/?email=${encodeURIComponent(
                                     email
                                   )}&member_name=${encodeURIComponent(
                                     item.firstName + "_" + item.lastName
@@ -346,10 +344,7 @@ const Dashboard = () => {
           <div className="note-section">
             <h3>Note:</h3>
             <p>
-              To save the chat to the cloud, click on the Cloud icon in the chat
-              box next to the send button. For reference, download a PDF of your
-              chat history by clicking the Download icon next to the Cloud Button
-              in the chat box.
+              To download a PDF of your chat history, click on the Download icon next to the send button in the chat box. You can also change the AI Engine from the dropdown menu at the top right.
             </p>
           </div>
         </div>
