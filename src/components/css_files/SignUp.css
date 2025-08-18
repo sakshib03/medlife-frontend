@@ -53,14 +53,14 @@ header {
     width: 100%;
     flex-direction: row;
     height: 470px;
-    background-color: white;
+    
    margin-top: 2rem;
-   padding: 20px;
+   margin: 20px;
 }
 
 .form-container {
     padding: 2rem;
-    background: #ffffff;
+    background-color: white;
     width: 50%;
     border-radius: 20px;
     border: 2px solid #ddd;
@@ -72,6 +72,7 @@ header {
     justify-content: center;
     align-items: center;
     background-color: white;
+    border-radius: 20px;
 }
 
 .illustration img {
