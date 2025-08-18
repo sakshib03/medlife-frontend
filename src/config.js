@@ -1,1 +1,1 @@
-export const API_BASE ="http://localhost:8000/medlifeV21";
+export const API_BASE ="http://semantic.onesmarter.com/medlifeV2";
