@@ -54,7 +54,8 @@ header {
     flex-direction: row;
     height: 470px;
     background-color: white;
-   margin-top: 4rem;
+   margin-top: 2rem;
+   padding: 20px;
 }
 
 .form-container {
@@ -197,8 +198,7 @@ header {
     }
 
     .illustration {
-        width: 50%;
-        padding: 1rem;
+        display: none;
     }
 
     .form-container h1 {
