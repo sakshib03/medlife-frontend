@@ -5,14 +5,13 @@ import "./css_files/SignUp.css";
 import sidelogo from "../assets/signup.png";
 import medlife from "../assets/v987-18a-removebg-preview.png";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react"; // kept as-is in case you add show/hide later
 import { useAuth } from "../context/AuthContext";
 import { API_BASE } from "../config";
 
 const Login = () => {
   const [login, setLogin] = useState("");
   const [otp, setOtp] = useState("");
-  const [step, setStep] = useState(1); // 1 = enter login, 2 = enter OTP
+  const [step, setStep] = useState(1); 
   const [isLoading, setIsLoading] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [countdown, setCountdown] = useState(0);

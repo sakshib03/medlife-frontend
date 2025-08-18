@@ -779,7 +779,7 @@ const ChatInterface = () => {
             onClick={handleNewChat}
             title="Start a new chat"
           >
-            <div style={{ display: "flex", gap: "190px" }}>
+            <div style={{ display: "flex", gap: "170px" }}>
               <p> Recent Chats</p>
               <span>
                 {" "}
