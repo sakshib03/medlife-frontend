@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import "./css_files/SignUp.css";
@@ -16,8 +16,17 @@ const SignUp = () => {
   const [mobileError, setMobileError] = useState("");
   const [emailFocused, setEmailFocused] = useState(false);
   const [mobileFocused, setMobileFocused] = useState(false);
+  const [isFormValid, setIsFormValid]= useState(false);
   const navigate = useNavigate();
 
+
+  useEffect(()=>{
+    const isUsernameValid=username.trim() !== "";
+    const isEmailValid = validateEmail(email);
+    const isMobileValid = validateMobile(mobile) === "";
+
+    setIsFormValid(isUsernameValid && isEmailValid && isMobileValid);
+  }, [username, email, mobile]);
 
   // Email validation function
   const validateEmail = (email) => {
@@ -178,7 +187,7 @@ const SignUp = () => {
               </p>
             )}
 
-            <button type="submit" className="sign-in-btn">
+            <button type="submit" className={`sign-in-btn ${isFormValid ? 'active' : ''}`}>
               Sign Up
             </button>
 

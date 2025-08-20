@@ -116,6 +116,10 @@ header {
     transition: background-color 0.3s ease;
 }
 
+.sign-in-btn.active{
+    background: #f4766f;
+} 
+
 .form-container .sign-in-btn:hover {
     background: #f4766f;
 }

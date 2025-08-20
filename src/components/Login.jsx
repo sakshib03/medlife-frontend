@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./css_files/SignUp.css";
@@ -17,6 +17,20 @@ const Login = () => {
   const [countdown, setCountdown] = useState(0);
   const navigate = useNavigate();
   const { login: authLogin } = useAuth();
+  const [isFormValid, setIsFormValid]=useState(false);
+
+  useEffect(() => {
+    // Validate the login input (could be email or phone)
+    const trimmedLogin = login.trim();
+    const isEmail = trimmedLogin.includes("@");
+    
+    if (isEmail) {
+      setIsFormValid(isValidEmail(trimmedLogin));
+    } else {
+      setIsFormValid(isValidPhone(trimmedLogin));
+    }
+  }, [login]);
+
 
   // Validation helpers
   const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -181,7 +195,7 @@ const Login = () => {
 
                 <button
                   type="submit"
-                  className="sign-in-btn"
+                  className={`sign-in-btn ${isFormValid ? 'active' : ''}`}
                   disabled={isLoading}
                 >
                   {isLoading ? "Sending..." : "Request OTP"}
