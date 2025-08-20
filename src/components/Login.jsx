@@ -44,7 +44,7 @@ const Login = () => {
       }
     } else {
       if (!isValidPhone(login)) {
-        toast.error("Please enter a valid phone number (10–15 digits)");
+        toast.error("Please enter a valid phone number (10)");
         return false;
       }
     }
@@ -158,7 +158,7 @@ const Login = () => {
         </div>
       </header>
 
-      <div className="container" style={{ maxHeight: "390px" }}>
+      <div className="container" style={{ maxHeight: "420px" }}>
         <div className="form-container">
           <h1>Login to Medlife.ai</h1>
 
