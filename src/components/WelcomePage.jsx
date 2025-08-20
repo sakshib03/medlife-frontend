@@ -23,8 +23,7 @@ import { useNavigate } from "react-router-dom";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 function WelcomePage() {
-  const { loginWithRedirect, user, isAuthenticated } = useAuth0();
-  const targetDivRef = useRef(null);
+  const { loginWithRedirect } = useAuth0();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeLink, setActiveLink] = useState("home");
   const navigate = useNavigate();
