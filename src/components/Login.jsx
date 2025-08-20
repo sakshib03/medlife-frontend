@@ -18,6 +18,7 @@ const Login = () => {
   const navigate = useNavigate();
   const { login: authLogin } = useAuth();
   const [isFormValid, setIsFormValid]=useState(false);
+  const [isOtpComplete, setIsOtpComplete] = useState(false);
 
   useEffect(() => {
     // Validate the login input (could be email or phone)
@@ -30,6 +31,11 @@ const Login = () => {
       setIsFormValid(isValidPhone(trimmedLogin));
     }
   }, [login]);
+
+  useEffect(()=>{
+    setIsOtpComplete(otp.length === 6);
+  }, [otp]);
+
 
 
   // Validation helpers
@@ -284,7 +290,7 @@ const Login = () => {
 
                 <button
                   type="submit"
-                  className="sign-in-btn"
+                  className={`sign-in-btn ${isOtpComplete ? 'active' : ''}`}
                   disabled={isLoading}
                 >
                   {isLoading ? "Verifying..." : "Verify OTP"}
