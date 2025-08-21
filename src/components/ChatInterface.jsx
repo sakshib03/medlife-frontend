@@ -600,6 +600,7 @@ const ChatInterface = () => {
       });
       if (!response.ok) throw new Error("Failed to save chat data");
 
+      if(!window.silentSave){
       toast.success("Chat saved to server successfully!", {
         position: "top-right",
         autoClose: 2000,
@@ -608,6 +609,7 @@ const ChatInterface = () => {
         draggable: true,
         progress: undefined,
       });
+    }
     } catch (err) {
       console.error("Error saving chat:", err);
       toast.error("Error saving chat data. Please try again.", {
@@ -631,13 +633,9 @@ const ChatInterface = () => {
           name: msg.name,
           message: String(msg.text || "").replace(/<br>/g, "\n"),
         }));
-        const safeName =
-          selectedMember.fullName ||
-          `${selectedMember.firstName || ""} ${
-            selectedMember.lastName || ""
-          }` ||
-          "Member";
-        generatePDF(formatted, safeName);
+        const currentChat = chatHistory.find(chat => chat.id === selectedChatId);
+      const sidebarName = currentChat ? currentChat.name : `Chat_${new Date().toISOString().split('T')[0]}`;
+        generatePDF(formatted, sidebarName);
       })
       .catch((err) => {
         console.error("Error loading PDF generator:", err);
@@ -691,6 +689,27 @@ const ChatInterface = () => {
     setIsSettings(false);
     setShowApiKeyPopup(false);
   };
+
+  useEffect(()=>{
+    const handleBeforeUnload = async (e) =>{
+      if(selectedMember && messages.length>0){
+        window.silentSave=true;
+        await handleSaveChat();
+        window.silentSave=false;
+      }
+    };
+
+    return()=>{
+      window.addEventListener('beforeunload', handleBeforeUnload);
+
+      if (selectedMember && messages.length > 0) {
+      window.silentSave = true;
+      handleSaveChat().then(() => {
+        window.silentSave = false;
+      });
+    }
+    };
+  },[selectedMember, messages, email]);
 
   // ===== Render =====
   return (
@@ -973,19 +992,33 @@ const ChatInterface = () => {
                   </h2>
                   <select
                     value={selectedMember ? selectedMember.memberIndex : ""}
-                    onChange={(e) => {
+                    onChange={async (e) => {
                       const selectedIndex = parseInt(e.target.value, 10);
                       const member =
                         data.find((m) => m.memberIndex === selectedIndex) ||
                         null;
+
+                        if(selectedMember && member && selectedMember.memberIndex === member.memberIndex){
+                          return;
+                        }
+
+                        if(selectedMember && messages.length > 0){
+                          window.silentSave = true;
+                          await handleSaveChat();
+                          window.silentSave = false;
+                        }
+
                       setSelectedMember(member);
                       if (member) {
                         localStorage.setItem(
                           keyFor("currentMember"),
                           JSON.stringify(member)
                         );
+                        handleNewChat();
                       } else {
                         localStorage.removeItem(keyFor("currentMember"));
+                        setMessages([]);
+                        setSelectedChatId(null);
                       }
                     }}
                     style={{
